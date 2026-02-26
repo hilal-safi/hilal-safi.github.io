@@ -1,10 +1,11 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>VolleySim Pro+ (Lineups • Rotations • Match Sim)</title>
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>VolleySim Pro+ (Lineups • Rotations • Match Sim)</title>
+<style>
     /* =========================
        Theme tokens (V5-inspired)
     ========================== */
@@ -40,8 +41,19 @@
       --teamA2:#fdba74;
       --teamB: #dc2626; /* red */
       --teamB2:#fca5a5;
+      --teamA_fade: rgba(234,88,12,.34);
+      --teamB_fade: rgba(220,38,38,.34);
 
-      /* Court */
+      
+      /* Team tint strength helpers */
+      --teamA_strong: rgba(234,88,12,.48);
+      --teamB_strong: rgba(220,38,38,.48);
+      --teamA_grad: linear-gradient(135deg, rgba(234,88,12,.72), rgba(253,186,116,.25));
+      --teamB_grad: linear-gradient(135deg, rgba(220,38,38,.72), rgba(252,165,165,.25));
+      --teamA_border: rgba(234,88,12,.85);
+      --teamB_border: rgba(220,38,38,.85);
+
+/* Court */
       --court-wood: #2a1a0b;
       --court-wood2:#3a2410;
       --court-lines: rgba(255,255,255,.80);
@@ -136,6 +148,9 @@
       align-items:center;
       gap:10px;
       min-width: 260px;
+    
+      cursor:pointer;
+      user-select:none;
     }
     .brand h1{
       margin:0;
@@ -165,7 +180,25 @@
       justify-content:flex-end;
     }
 
-    .segmented{
+    
+    .teamBadge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--panel2);
+      font-weight: 950;
+      letter-spacing:.2px;
+      box-shadow: 0 14px 28px rgba(0,0,0,.18);
+      user-select:none;
+    }
+    .teamBadge .dot{width:10px;height:10px;border-radius:999px; display:inline-block; box-shadow: 0 0 0 3px rgba(255,255,255,.06);}
+    .teamBadge.a{border-color: var(--teamA_border); background: var(--teamA_grad);}
+    .teamBadge.b{border-color: var(--teamB_border); background: var(--teamB_grad);}
+    .teamBadge.both{border-color: rgba(255,255,255,.18); background: linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.04));}
+.segmented{
       display:inline-flex;
       background: var(--panel);
       border:1px solid var(--border);
@@ -193,6 +226,38 @@
     }
     .segmented button:hover{background: var(--btnHover); color: var(--text)}
     .segmented button:active{transform: translateY(1px)}
+
+    /* Team picker emphasis (Lineup Builder) */
+    .segmented.teamPicker{gap:6px}
+    .segmented.teamPicker .teamPick{padding:8px 12px}
+    .segmented.teamPicker .teamPick .teamDot{width:10px;height:10px}
+    .segmented.teamPicker .teamPick[aria-selected="true"][data-team="A"]{
+      background: var(--teamA_grad);
+      color: var(--text);
+      outline: 2px solid rgba(255,255,255,.10);
+    }
+    .segmented.teamPicker .teamPick[aria-selected="true"][data-team="B"]{
+      background: var(--teamB_grad);
+      color: var(--text);
+      outline: 2px solid rgba(255,255,255,.10);
+    }
+    .segmented.teamPicker .teamPick[aria-selected="false"][data-team="A"]:hover{background: rgba(255,255,255,.08)}
+    .segmented.teamPicker .teamPick[aria-selected="false"][data-team="B"]:hover{background: rgba(255,255,255,.08)}
+    #lineupEditingHint{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius: 999px;
+      border:1px solid var(--border);
+      background: var(--panel);
+      font-weight:800;
+      width: fit-content;
+    }
+
+    /* Lineup tab: make active team obvious */
+    #viewLineup[data-active-team="A"] .grid-lineup > section.card:first-child{border-color: rgba(255,255,255,.14); box-shadow: 0 0 0 3px var(--teamA_fade), var(--shadow);}
+    #viewLineup[data-active-team="B"] .grid-lineup > section.card:first-child{border-color: rgba(255,255,255,.14); box-shadow: 0 0 0 3px var(--teamB_fade), var(--shadow);}
     .icon{width:18px;height:18px; display:inline-block; color: currentColor;}
 
     main{
@@ -230,7 +295,7 @@
     .card-header p{
       margin:4px 0 0 0;
       color: var(--muted);
-      font-size:12px;
+      font-size:14px;
       font-weight:650;
     }
     .card-body{padding:14px;}
@@ -271,7 +336,7 @@
     .btn:disabled{opacity:.55; cursor:not-allowed; transform:none;}
 
     .pill{
-      font-size:12px;
+      font-size:14px;
       padding:6px 10px;
       border-radius:999px;
       background: var(--panel2);
@@ -286,7 +351,7 @@
 
     label{
       display:block;
-      font-size:12px;
+      font-size:14px;
       color: var(--muted);
       margin-bottom:6px;
       font-weight:800;
@@ -364,8 +429,8 @@
       background: rgba(255,255,255,.03);
     }
     [data-theme="light"] .step{background: rgba(0,0,0,.02)}
-    .step b{display:block; font-size:12px; font-weight:950; margin-bottom:6px;}
-    .step p{margin:0; font-size:12px; color: var(--muted); font-weight:750; line-height:1.45;}
+    .step b{display:block; font-size:14px; font-weight:950; margin-bottom:6px;}
+    .step p{margin:0; font-size:14px; color: var(--muted); font-weight:750; line-height:1.45;}
 
     details{
       border:1px solid var(--border);
@@ -400,7 +465,7 @@
     .ruleBody{
       margin-top:10px;
       color: var(--muted);
-      font-size:12px;
+      font-size:14px;
       font-weight:750;
       line-height:1.5;
     }
@@ -414,7 +479,7 @@
       box-shadow: var(--focus);
       border-color: rgba(112,214,255,.35);
     }
-    textarea{min-height:110px; resize:vertical; font-family: var(--mono); font-size:12px;}
+    textarea{min-height:110px; resize:vertical; font-family: var(--mono); font-size:14px;}
 
     .grid-match{
       display:grid;
@@ -425,6 +490,130 @@
     @media (max-width: 1100px){
       .grid-match{grid-template-columns: 1fr; }
     }
+
+    /* =========================
+       League split calculator
+    ========================== */
+    .splitGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:16px;
+      align-items:start;
+    }
+    @media (max-width: 1100px){
+      .splitGrid{grid-template-columns: 1fr;}
+    }
+
+    .splitTop{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .splitSummary{
+      margin-top:12px;
+      border-radius: 14px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      padding:12px;
+    }
+    [data-theme="light"] .splitSummary{ background: rgba(0,0,0,.02); }
+    /* Team tint for split cards (match other pages) */
+    .splitTeamCard{
+      position: relative;
+      overflow: hidden;
+    }
+    .splitTeamCard[data-team="A"]{
+      background:
+        linear-gradient(225deg, var(--teamA_strong), transparent 62%),
+        var(--panel);
+      border-color: rgba(255,255,255,.14);
+      box-shadow: 0 18px 40px rgba(0,0,0,.35);
+    }
+    .splitTeamCard[data-team="B"]{
+      background:
+        linear-gradient(225deg, var(--teamB_strong), transparent 62%),
+        var(--panel);
+      border-color: rgba(255,255,255,.14);
+      box-shadow: 0 18px 40px rgba(0,0,0,.35);
+    }
+    /* a subtle “glass” sheen */
+    .splitTeamCard[data-team="A"]::before,
+    .splitTeamCard[data-team="B"]::before{
+      content:"";
+      position:absolute; inset:0;
+      background: radial-gradient(1200px 520px at 20% 0%, rgba(255,255,255,.08), transparent 55%);
+      pointer-events:none;
+      opacity:.9;
+    }
+    [data-theme="light"] .splitTeamCard[data-team="A"]{
+      background:
+        linear-gradient(225deg, rgba(234,88,12,.22), transparent 62%),
+        rgba(255,255,255,.92);
+      border-color: rgba(0,0,0,.08);
+      box-shadow: 0 14px 30px rgba(0,0,0,.10);
+    }
+    [data-theme="light"] .splitTeamCard[data-team="B"]{
+      background:
+        linear-gradient(225deg, rgba(220,38,38,.20), transparent 62%),
+        rgba(255,255,255,.92);
+      border-color: rgba(0,0,0,.08);
+      box-shadow: 0 14px 30px rgba(0,0,0,.10);
+    }
+
+
+    .splitKpis{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top:10px;
+    }
+
+    .splitTable{
+      margin-top:12px;
+      border-radius: 14px;
+      border:1px solid var(--border);
+      overflow:hidden;
+      background: rgba(255,255,255,.03);
+    }
+    [data-theme="light"] .splitTable{ background: rgba(0,0,0,.02); }
+
+    .splitRow{
+      display:grid;
+      grid-template-columns: 1.3fr .7fr 44px;
+      gap:10px;
+      align-items:center;
+      padding:10px;
+      border-bottom:1px solid var(--border);
+    }
+    .splitRow:last-child{border-bottom:0}
+    .splitRow input{ background: rgba(0,0,0,.10); }
+    [data-theme="light"] .splitRow input{ background: rgba(255,255,255,.65); }
+
+    .splitHead{
+      display:grid;
+      grid-template-columns: 1.3fr .7fr 44px;
+      gap:10px;
+      padding:10px;
+      border-bottom:1px solid var(--border);
+      background: var(--panel2);
+      color: var(--muted);
+      font-weight:950;
+      font-size:14px;
+    }
+
+    .miniBtn.neutral{
+      background: rgba(255,255,255,.06);
+    }
+    [data-theme="light"] .miniBtn.neutral{
+      background: rgba(0,0,0,.06);
+    }
+
+    .moneyPos{ color: var(--warn); font-weight:950; }
+    .moneyNeg{ color: var(--good); font-weight:950; }
 
     /* =========================
        Team panels
@@ -449,6 +638,19 @@
       align-items:center;
     }
 
+    /* Team tint (customizable via Team Settings) */
+    #panelA.card{
+      background:
+        linear-gradient(135deg, var(--teamA_fade), transparent 65%),
+        var(--panel);
+    }
+    #panelB.card{
+      background:
+        linear-gradient(225deg, var(--teamB_fade), transparent 65%),
+        var(--panel);
+    }
+
+
     .fieldRow{
       display:grid;
       grid-template-columns: 1.4fr .9fr .9fr;
@@ -460,8 +662,8 @@
       gap:10px;
     }
 
-    .hint{font-size:12px; color: var(--muted); margin-top:8px; font-weight:650;}
-    .mono{font-family: var(--mono); font-size:12px; color: var(--muted);}
+    .hint{font-size:14px; color: var(--muted); margin-top:8px; font-weight:650;}
+    .mono{font-family: var(--mono); font-size:14px; color: var(--muted);}
 
     .notice{
       margin-top:10px;
@@ -470,7 +672,7 @@
       border:1px solid rgba(251,191,36,.25);
       background: rgba(251,191,36,.12);
       color: rgba(251,191,36,.95);
-      font-size:12px;
+      font-size:14px;
       font-weight:700;
       display:none;
       white-space:pre-line;
@@ -484,7 +686,7 @@
       border:1px solid rgba(45,212,191,.25);
       background: rgba(45,212,191,.12);
       color: rgba(45,212,191,.95);
-      font-size:12px;
+      font-size:14px;
       font-weight:800;
       display:none;
     }
@@ -518,7 +720,7 @@
     }
     .rName{
       font-weight:900;
-      font-size:12px;
+      font-size:14px;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
@@ -578,10 +780,17 @@
       background: rgba(255,255,255,.03);
     }
     [data-theme="light"] .slot{background: rgba(0,0,0,.02)}
-    .slot b{font-size:12px; font-weight:950;}
+    .slot b{font-size:14px; font-weight:950;}
     .slot small{display:block; color: var(--muted); font-weight:800; margin-top:2px;}
 
-    .rowBtns{
+    .row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+.rowBtns{
       display:flex;
       gap:10px;
       flex-wrap:wrap;
@@ -619,7 +828,7 @@
       gap:8px;
       color: var(--muted);
       font-weight:900;
-      font-size:12px;
+      font-size:14px;
     }
     .scoreNum{
       font-size:28px;
@@ -647,7 +856,7 @@
       text-align:center;
     }
     .servePill{
-      font-size:12px;
+      font-size:14px;
       padding:6px 10px;
       border-radius:999px;
       border:1px solid var(--border);
@@ -669,7 +878,7 @@
     .court-container{
       position: relative;
       width: 100%;
-      max-width: 520px;
+      max-width: 680px;
       margin: 0 auto;
       /* Shorter court so it fits better without scrolling */
       height: clamp(320px, 50vh, 560px);
@@ -730,8 +939,8 @@
 
     .player-token{
       position: absolute;
-      width: 58px; height: 58px;
-      border-radius: 999px;
+      width: 68px; height: 68px;
+      border-radius: 16px;
       border: 3px solid;
       display: none;
       flex-direction: column;
@@ -751,18 +960,18 @@
     [data-theme="dark"] .player-token{
       background: rgba(255,255,255,.94);
     }
-    .team-a-token{ border-color: var(--teamA); }
-    .team-b-token{ border-color: var(--teamB); }
+    .team-a-token{ border-color: var(--teamA); background: linear-gradient(135deg, var(--teamA_strong), rgba(255,255,255,.92) 62%); }
+    .team-b-token{ border-color: var(--teamB); background: linear-gradient(135deg, var(--teamB_strong), rgba(255,255,255,.92) 62%); }
 
     .token-jersey{
       font-weight:950;
-      font-size:14px;
+      font-size:15px;
       line-height:1;
     }
     .token-name{
       width: 100%;
       font-weight:900;
-      font-size:10px;
+      font-size:11px;
       line-height:1.05;
       overflow:hidden;
       text-overflow: ellipsis;
@@ -770,7 +979,7 @@
     }
     .token-role{
       font-weight:950;
-      font-size:9px;
+      font-size:10px;
       padding:3px 6px;
       border-radius:999px;
       border:1px solid rgba(112,214,255,.25);
@@ -815,7 +1024,7 @@
       align-items:center;
     }
     .tiny{
-      font-size:12px;
+      font-size:14px;
       color: var(--muted);
       font-weight:800;
     }
@@ -835,7 +1044,7 @@
     .toggle:hover{background: var(--btnHover)}
     .toggle:active{transform: translateY(1px)}
     .toggle input{width:auto; margin:0}
-    .toggle span{font-size:12px; font-weight:900; color: var(--muted)}
+    .toggle span{font-size:14px; font-weight:900; color: var(--muted)}
 
     .eventLog{
       margin-top:12px;
@@ -847,7 +1056,7 @@
     [data-theme="light"] .eventLog{background: rgba(0,0,0,.02)}
     .eventLog h3{
       margin:0 0 8px 0;
-      font-size:12px;
+      font-size:14px;
       font-weight:950;
       letter-spacing:.2px;
       color: var(--muted);
@@ -857,7 +1066,7 @@
       margin:0;
       padding-left: 18px;
       color: var(--muted);
-      font-size:12px;
+      font-size:14px;
       font-weight:750;
       line-height:1.45;
     }
@@ -906,7 +1115,7 @@
       align-items:center;
     }
     .miniRotation .miniHead b{
-      font-size:12px;
+      font-size:14px;
       font-weight:950;
     }
     .miniRotation .miniHead small{
@@ -1002,7 +1211,7 @@
     .lineupCourt{
       position: relative;
       width: 100%;
-      max-width: 520px;
+      max-width: 680px;
       margin: 0 auto;
       border-radius: var(--radius);
       overflow: hidden;
@@ -1012,7 +1221,7 @@
         radial-gradient(circle at 14px 14px, rgba(255,255,255,.10) 2px, transparent 2.1px) 0 0 / 28px 28px,
         linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,.20)),
         linear-gradient(180deg, var(--court-wood), var(--court-wood2));
-      padding: 12px;
+      padding: 14px;
     }
     [data-theme="light"] .lineupCourt{
       background:
@@ -1048,9 +1257,9 @@
       display:grid;
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: repeat(2, 1fr);
-      gap: 10px;
+      gap: 12px;
       padding-top: 16px; /* room for net */
-      min-height: 260px;
+      min-height: 360px;
     }
     .lcZone{
       position:relative;
@@ -1061,7 +1270,7 @@
       display:flex;
       align-items:stretch;
       justify-content:stretch;
-      padding: 10px;
+      padding: 12px;
     }
     [data-theme="light"] .lcZone{
       border: 1px solid rgba(0,0,0,.12);
@@ -1110,11 +1319,11 @@
       display:flex;
       flex-direction:column;
       gap:4px;
-      min-height: 62px;
+      min-height: 88px;
       justify-content:center;
     }
-    .lineupCourt.myA .lcToken{ border-color: rgba(234, 88, 12, .85); }
-    .lineupCourt.myB .lcToken{ border-color: rgba(220, 38, 38, .85); }
+    .lineupCourt.myA .lcToken{ border-color: color-mix(in oklab, var(--teamA) 85%, white); background: linear-gradient(135deg, var(--teamA_fade), rgba(255,255,255,.92) 58%); }
+    .lineupCourt.myB .lcToken{ border-color: color-mix(in oklab, var(--teamB) 85%, white); background: linear-gradient(135deg, var(--teamB_fade), rgba(255,255,255,.92) 58%); }
 
     .lcToken.empty{
       background: rgba(0,0,0,.20);
@@ -1129,7 +1338,7 @@
 
     .lcName{
       font-weight:950;
-      font-size:12px;
+      font-size:14px;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
@@ -1137,7 +1346,7 @@
     }
     .lcRole{
       font-weight:950;
-      font-size:10px;
+      font-size: 12px;
       color: rgba(0,0,0,.60);
       white-space:nowrap;
       overflow:hidden;
@@ -1223,7 +1432,7 @@
       }
       .header-inner{
         padding: 12px 12px;
-        gap: 10px;
+        gap: 12px;
         flex-wrap: nowrap;
         justify-content: space-between;
       }
@@ -1268,7 +1477,7 @@
 
       /* Tighten some dense grids */
       .grid-home, .grid-lineup, .grid-match{ gap: 12px; }
-      .steps{ gap: 10px; }
+      .steps{ gap: 12px; }
 
       /* Shorter sim court on mobile */
       .court-container{
@@ -1287,749 +1496,1235 @@
       .coachGrid{grid-template-columns: repeat(3, 1fr)}
       .no-print{display:none !important}
     }
-  </style>
-</head>
+  
+    /* =========================
+       Calendar month grid
+    ========================== */
+    .calGrid{
+      display:grid;
+      grid-template-columns: repeat(7, minmax(0,1fr));
+      gap:10px;
+      user-select:none;
+    }
+    .calDow{
+      font-size:14px;
+      font-weight:900;
+      letter-spacing:.6px;
+      text-transform:uppercase;
+      color: var(--subtle);
+      padding:0 2px;
+    }
+    .calDay{
+      position:relative;
+      border:1px solid var(--border);
+      background: var(--panel);
+      border-radius: 14px;
+      padding:10px;
+      min-height: 92px;
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+      cursor:pointer;
+      transition: transform .08s ease, background .16s ease, border-color .16s ease;
+    }
+    .calDay:hover{ background: var(--btnHover); }
+    .calDay:active{ transform: translateY(1px); }
+    .calDay.muted{
+      opacity:.55;
+    }
+    .calDay.selected{
+      border-color: rgba(255,255,255,.18);
+      box-shadow: 0 0 0 3px rgba(112,214,255,.18), var(--shadow2);
+    }
+    .calNum{
+      font-weight:900;
+      font-size:13px;
+      color: var(--text);
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin-bottom:8px;
+    }
+    .calNum .dot{
+      width:8px;height:8px;border-radius:999px;
+      background: var(--subtle);
+      opacity:.6;
+    }
+    
+    /* Calendar month header: force single-line layout (even on mobile) */
+    .calMonthRow{display:flex !important; flex-direction:row !important; align-items:center !important; justify-content:flex-start !important; flex-wrap:nowrap !important;}
+    .calMonthRow > *{flex:0 0 auto;}
+    .calMonthRow .btn{width:auto !important; white-space:nowrap;}
+    #calMonthLabel{white-space:nowrap; font-weight:950; letter-spacing:.2px; padding: 0 2px;}
+.calPills{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .calPill{
+      width:100%;
+      text-align:left;
+      border:1px solid var(--border);
+      border-radius: 12px;
+      padding:6px 8px;
+      background: rgba(0,0,0,.00);
+      color: var(--text);
+      cursor:pointer;
+      font-weight:800;
+      font-size:14px;
+      line-height:1.1;
+      transition: background .16s ease, transform .06s ease, border-color .16s ease;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .calPill:hover{ background: var(--btnHover); }
+    .calPill:active{ transform: translateY(1px); }
+    .calPill.teamA{ border-color: color-mix(in oklab, var(--teamA) 70%, transparent); background: linear-gradient(135deg, var(--teamA_fade), transparent 70%); }
+    .calPill.teamB{ border-color: color-mix(in oklab, var(--teamB) 70%, transparent); background: linear-gradient(135deg, var(--teamB_fade), transparent 70%); }
+    .calPill.both{ border-color: rgba(255,255,255,.16); background: rgba(255,255,255,.06); }
+    [data-theme="light"] .calPill.both{ background: rgba(0,0,0,.05); }
 
+
+    /* Coach sheet team selector: stronger team tint */
+    .coachPicker .coachPick{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding: 10px 14px;
+    }
+    .coachPicker .coachPick.a[aria-selected="true"]{
+      background: var(--teamA_grad);
+      border-color: var(--teamA_border);
+      box-shadow: 0 12px 24px rgba(234,88,12,.10);
+    }
+    .coachPicker .coachPick.b[aria-selected="true"]{
+      background: var(--teamB_grad);
+      border-color: var(--teamB_border);
+      box-shadow: 0 12px 24px rgba(220,38,38,.10);
+    }
+    .coachPicker .coachPick.a{ color: var(--text); }
+    .coachPicker .coachPick.b{ color: var(--text); }
+
+    #brandHome:focus{ outline:none; box-shadow: var(--focus); border-radius: 14px; }
+    #brandHome:active{ transform: translateY(1px); }
+    .calMonthRow{ gap:10px; align-items:center; flex-wrap:nowrap; overflow-x:auto; }
+    .calMonthRow::-webkit-scrollbar{ height: 0px; }
+    .calMonthRow > *{ flex: 0 0 auto; }
+</style>
+</head>
 <body>
 <div class="app" id="appRoot">
-  <header>
-    <div class="header-inner">
-      <div class="brand">
-        <svg class="vb" viewBox="0 0 64 64" aria-hidden="true">
-          <defs>
-            <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="rgba(112,214,255,.95)"/>
-              <stop offset="1" stop-color="rgba(139,92,246,.95)"/>
-            </linearGradient>
-          </defs>
-          <circle cx="32" cy="32" r="26" fill="none" stroke="url(#g1)" stroke-width="4"/>
-          <path d="M14 26c10 0 20 6 24 16" fill="none" stroke="url(#g1)" stroke-width="3" stroke-linecap="round" opacity=".9"/>
-          <path d="M30 8c6 10 6 22 0 32" fill="none" stroke="url(#g1)" stroke-width="3" stroke-linecap="round" opacity=".85"/>
-          <path d="M50 20c-9 4-16 12-18 22" fill="none" stroke="url(#g1)" stroke-width="3" stroke-linecap="round" opacity=".85"/>
-          <circle cx="32" cy="32" r="2.6" fill="url(#g1)" opacity=".9"/>
-        </svg>
-        <div>
-          <h1>VolleySim Pro+</h1>
-          <small>Full-court sim + manual lineups, rotations, coach sheet, JSON save/load</small>
-        </div>
-      </div>
+<header>
+<div class="header-inner">
+<div class="brand" id="brandHome" role="button" tabindex="0" title="Go to Home">
+<svg aria-hidden="true" class="vb" viewbox="0 0 64 64">
+<defs>
+<lineargradient id="g1" x1="0" x2="1" y1="0" y2="1">
+<stop offset="0" stop-color="rgba(112,214,255,.95)"></stop>
+<stop offset="1" stop-color="rgba(139,92,246,.95)"></stop>
+</lineargradient>
+</defs>
+<circle cx="32" cy="32" fill="none" r="26" stroke="url(#g1)" stroke-width="4"></circle>
+<path d="M14 26c10 0 20 6 24 16" fill="none" opacity=".9" stroke="url(#g1)" stroke-linecap="round" stroke-width="3"></path>
+<path d="M30 8c6 10 6 22 0 32" fill="none" opacity=".85" stroke="url(#g1)" stroke-linecap="round" stroke-width="3"></path>
+<path d="M50 20c-9 4-16 12-18 22" fill="none" opacity=".85" stroke="url(#g1)" stroke-linecap="round" stroke-width="3"></path>
+<circle cx="32" cy="32" fill="url(#g1)" opacity=".9" r="2.6"></circle>
+</svg>
+<div>
+<h1>VolleySim Pro+</h1>
+<small>Full-court sim + manual lineups, rotations, coach sheet, JSON save/load</small>
+</div>
+</div>
+<div aria-label="Views" class="segmented tabs" role="tablist">
 
-      <div class="segmented tabs" role="tablist" aria-label="Views">
-        <button id="tabHome" role="tab" aria-selected="true" aria-controls="viewHome">
-          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path fill="currentColor" d="M12 3l9 8h-3v9h-5v-6H11v6H6v-9H3l9-8z"/>
-          </svg>
-          Home
-        </button>
-        <button id="tabLineup" role="tab" aria-selected="false" aria-controls="viewLineup">
-          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path fill="currentColor" d="M4 6h16v2H4V6zm0 5h10v2H4v-2zm0 5h16v2H4v-2zm12-5l4-3v10l-4-3v-4z"/>
-          </svg>
+<button aria-controls="viewLineup" aria-selected="false" id="tabLineup" role="tab">
+<svg aria-hidden="true" class="icon" viewbox="0 0 24 24">
+<path d="M4 6h16v2H4V6zm0 5h10v2H4v-2zm0 5h16v2H4v-2zm12-5l4-3v10l-4-3v-4z" fill="currentColor"></path>
+</svg>
           Lineup
         </button>
-        <button id="tabSim" role="tab" aria-selected="false" aria-controls="viewSim">
-          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path fill="currentColor" d="M7 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm3 4v8l7-4-7-4z"/>
-          </svg>
+<button aria-controls="viewSim" aria-selected="false" id="tabSim" role="tab">
+<svg aria-hidden="true" class="icon" viewbox="0 0 24 24">
+<path d="M7 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm3 4v8l7-4-7-4z" fill="currentColor"></path>
+</svg>
           Simulation
         </button>
-        <button id="tabCoach" role="tab" aria-selected="false" aria-controls="viewCoach">
-          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path fill="currentColor" d="M4 4h16v3H4V4zm0 6h16v10H4V10zm2 2v6h12v-6H6z"/>
-          </svg>
+<button aria-controls="viewCoach" aria-selected="false" id="tabCoach" role="tab">
+<svg aria-hidden="true" class="icon" viewbox="0 0 24 24">
+<path d="M4 4h16v3H4V4zm0 6h16v10H4V10zm2 2v6h12v-6H6z" fill="currentColor"></path>
+</svg>
           Coach Sheet
         </button>
-        <button id="tabRules" role="tab" aria-selected="false" aria-controls="viewRules">
-          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path fill="currentColor" d="M4 3h14a2 2 0 0 1 2 2v14H6a2 2 0 0 0-2 2V3zm4 5h10v2H8V8zm0 4h10v2H8v-2z"/>
-          </svg>
-          Rules & Tips
+
+<button aria-controls="viewSplit" aria-selected="false" id="tabSplit" role="tab">
+<svg aria-hidden="true" class="icon" viewbox="0 0 24 24">
+<path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm0 4h10V4H7v2zm2 4h2v2H9V10zm4 0h2v2h-2V10zM9 14h2v2H9v-2zm4 0h2v2h-2v-2zM9 18h6v2H9v-2z" fill="currentColor"></path>
+</svg>
+          Split Calc
         </button>
-      </div>
-
-      <div class="header-actions no-print">
-        <button class="btn ghost" id="themeToggle" title="Toggle light/dark mode" aria-label="Toggle light/dark mode">
-          <svg class="icon" id="themeIcon" viewBox="0 0 24 24" aria-hidden="true"></svg>
-          <span id="themeLabel">Dark</span>
+<button aria-controls="viewCalendar" aria-selected="false" id="tabCalendar" role="tab">
+<svg aria-hidden="true" class="icon" viewbox="0 0 24 24">
+<path d="M7 2a1 1 0 0 1 1 1v1h8V3a1 1 0 1 1 2 0v1h1a3 3 0 0 1 3 3v13a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h1V3a1 1 0 0 1 1-1zm12 8H5v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V10zM6 6a1 1 0 0 0-1 1v1h14V7a1 1 0 0 0-1-1H6z" fill="currentColor"></path>
+</svg>
+          Calendar
         </button>
-      </div>
-    </div>
-  </header>
-
-  <main>
-    
-    <!-- HOME VIEW -->
-    <section id="viewHome" class="view" role="tabpanel" aria-labelledby="tabHome">
-      <section class="card" style="margin-bottom:16px;">
-        <div class="card-header">
-          <div>
-            <h2>🚀 Quick Start</h2>
-            <p>Build your roster → set a starting 6 → rotate → simulate.</p>
-          </div>
-          <div class="rowBtns no-print">
-            <button class="btn primary" id="goLineup">🧩 Open Lineup Builder</button>
-            <button class="btn" id="goSim">🎮 Open Simulation</button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="steps">
-            <div class="step">
-              <b>1) Add your roster</b>
-              <p>Use the Team A/Team B cards below to add players (name, role, ratings). You can keep Team B as a “scrimmage opponent”, or ignore it.</p>
-            </div>
-            <div class="step">
-              <b>2) Assign zones 1–6</b>
-              <p>Each team needs exactly 6 unique players assigned to zones. Zone <b>1</b> is the <b>server</b>. Rotation is clockwise: <span class="mono">1→6→5→4→3→2→1</span>.</p>
-            </div>
-            <div class="step">
-              <b>3) Rotate or simulate</b>
-              <p>Use Rotate / Undo / Reset on each team, or run the full rally simulation in the Simulation tab. Coach Sheet prints rotations 1–6.</p>
-            </div>
-          </div>
-          <div class="hint">Tip: If simulation says your lineups are incomplete, go back to Home or Lineup and fix any warnings.</div>
-        </div>
-      </section>
-
-      <div class="grid-home">
-
+<button aria-controls="viewRules" aria-selected="false" id="tabRules" role="tab">
+<svg aria-hidden="true" class="icon" viewbox="0 0 24 24">
+<path d="M4 3h14a2 2 0 0 1 2 2v14H6a2 2 0 0 0-2 2V3zm4 5h10v2H8V8zm0 4h10v2H8v-2z" fill="currentColor"></path>
+</svg>
+          Rules &amp; Tips
+        </button></div>
+<div class="header-actions no-print">
+<button aria-label="Toggle light/dark mode" class="btn ghost" id="themeToggle" title="Toggle light/dark mode">
+<svg aria-hidden="true" class="icon" id="themeIcon" viewbox="0 0 24 24"></svg>
+<span id="themeLabel">Dark</span>
+</button>
+</div>
+</div>
+</header>
+<main>
+<!-- HOME VIEW -->
+<section aria-labelledby="tabHome" class="view" id="viewHome" role="tabpanel">
+<section class="card" style="margin-bottom:16px;">
+<div class="card-header">
+<div>
+<h2>🚀 Quick Start</h2>
+<p>Build your roster → set a starting 6 → rotate → simulate.</p>
+</div>
+<div class="rowBtns no-print">
+<button class="btn primary" id="goLineup">🧩 Open Lineup Builder</button>
+<button class="btn" id="goSim">🎮 Open Simulation</button>
+</div>
+</div>
+<div class="card-body">
+<div class="steps">
+<div class="step">
+<b>1) Add your roster</b>
+<p>Use the Team A/Team B cards below to add players (name, role, ratings). You can keep Team B as a “scrimmage opponent”, or ignore it.</p>
+</div>
+<div class="step">
+<b>2) Assign zones 1–6</b>
+<p>Each team needs exactly 6 unique players assigned to zones. Zone <b>1</b> is the <b>server</b>. Rotation is clockwise: <span class="mono">1→6→5→4→3→2→1</span>.</p>
+</div>
+<div class="step">
+<b>3) Rotate or simulate</b>
+<p>Use Rotate / Undo / Reset on each team, or run the full rally simulation in the Simulation tab. Coach Sheet prints rotations 1–6.</p>
+</div>
+</div>
+<div class="hint">Tip: If simulation says your lineups are incomplete, go back to Home or Lineup and fix any warnings.</div>
+</div>
+</section>
+<section class="card" id="teamSettingsCard" style="margin-bottom:16px;">
+<div class="card-header">
+<div>
+<h2 style="margin:0;">Team Settings</h2>
+<div class="hint" style="margin-top:6px;">Rename teams and set a color tint so Team A vs Team B is always obvious across the app (Split Calc, Calendar, Simulation).</div>
+</div>
+</div>
+<div class="card-body">
+<div class="grid" style="grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px;">
+<div class="card" style="background:var(--panel2); border:1px solid var(--border); padding:12px; border-radius: var(--radius2);">
+<div class="row" style="justify-content:space-between; align-items:center; gap:10px;">
+<div class="teamLabel"><span class="teamDot a"></span> <span id="teamANameLabel">Team A</span></div>
+<input id="teamAColor" style="width:44px;height:34px; padding:0; border-radius:10px; border:1px solid var(--border); background: transparent;" title="Team A color" type="color"/>
+</div>
+<div style="margin-top:10px;">
+<div class="label">Team name</div>
+<input id="teamAName" placeholder="e.g., Smash Bros" type="text"/>
+</div>
+<div class="hint">Used everywhere the app shows “Team A”.</div>
+</div>
+<div class="card" style="background:var(--panel2); border:1px solid var(--border); padding:12px; border-radius: var(--radius2);">
+<div class="row" style="justify-content:space-between; align-items:center; gap:10px;">
+<div class="teamLabel"><span class="teamDot b"></span> <span id="teamBNameLabel">Team B</span></div>
+<input id="teamBColor" style="width:44px;height:34px; padding:0; border-radius:10px; border:1px solid var(--border); background: transparent;" title="Team B color" type="color"/>
+</div>
+<div style="margin-top:10px;">
+<div class="label">Team name</div>
+<input id="teamBName" placeholder="e.g., Block Party" type="text"/>
+</div>
+<div class="hint">Used everywhere the app shows “Team B”.</div>
+</div>
+</div>
+<div class="row" style="gap:10px; margin-top:12px; flex-wrap:wrap;">
+<button class="btn" id="applyTeamBranding">
+<svg aria-hidden="true" class="icon" viewbox="0 0 24 24"><path d="M5 20h14v2H5v-2zm2-2h10l2-10H5l2 10zm3-8h4v2h-4v-2z" fill="currentColor"></path></svg>
+              Apply
+            </button>
+<button class="btn ghost" id="resetTeamBranding">Reset</button>
+<div class="hint" id="teamBrandingStatus" style="margin-left:auto;"></div>
+</div>
+</div>
+</section>
+<div class="grid-home">
 <section class="card" id="panelA">
-          <div class="card-header">
-            <div>
-              <div class="teamTitle">
-                <span class="teamDot a" aria-hidden="true"></span>
-                <h2>Team A (Home)</h2>
-              </div>
-              <p>Add players, assign a 6-person lineup, rotate manually.</p>
-            </div>
-            <div class="teamMeta">
-              <span class="pill">Rot: <strong id="rotA" style="color:var(--text)">1</strong></span>
-              <span class="pill">Server: <strong id="serverA" style="color:var(--text)">—</strong></span>
-            </div>
-          </div>
-          <div class="card-body">
-            <div class="fieldRow2">
-              <div>
-                <label for="name-a">Name</label>
-                <input type="text" id="name-a" placeholder="Player name" autocomplete="off" />
-              </div>
-              <div>
-                <label for="jersey-a">Jersey #</label>
-                <input type="number" id="jersey-a" placeholder="Optional" min="0" max="99" />
-              </div>
-            </div>
-
-            <div class="fieldRow" style="margin-top:10px;">
-              <div>
-                <label for="role-a">Role</label>
-                <select id="role-a">
-                  <option value="S">Setter (S)</option>
-                  <option value="OH">Outside (OH)</option>
-                  <option value="MB">Middle (MB)</option>
-                  <option value="OPP">Opposite (OPP)</option>
-                  <option value="L">Libero (L)</option>
-                  <option value="DS">Defensive Specialist (DS)</option>
-                </select>
-              </div>
-              <div>
-                <label for="spk-a">Spk (1–10)</label>
-                <input type="number" id="spk-a" min="1" max="10" value="5" />
-              </div>
-              <div>
-                <label for="rcv-a">Rcv (1–10)</label>
-                <input type="number" id="rcv-a" min="1" max="10" value="5" />
-              </div>
-            </div>
-
-            <div class="rowBtns">
-              <button class="btn" id="btnAddA">
-                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11 5h2v14h-2V5zm-6 6h14v2H5v-2z"/></svg>
+<div class="card-header">
+<div>
+<div class="teamTitle">
+<span aria-hidden="true" class="teamDot a"></span>
+<h2 id="teamAHeader">Team A (Home)</h2>
+</div>
+<p>Add players, assign a 6-person lineup, rotate manually.</p>
+</div>
+<div class="teamMeta">
+<span class="pill">Rot: <strong id="rotA" style="color:var(--text)">1</strong></span>
+<span class="pill">Server: <strong id="serverA" style="color:var(--text)">—</strong></span>
+</div>
+</div>
+<div class="card-body">
+<div class="fieldRow2">
+<div>
+<label for="name-a">Name</label>
+<input autocomplete="off" id="name-a" placeholder="Player name" type="text">
+</input></div>
+<div>
+<label for="jersey-a">Jersey #</label>
+<input id="jersey-a" max="99" min="0" placeholder="Optional" type="number">
+</input></div>
+</div>
+<div class="fieldRow" style="margin-top:10px;">
+<div>
+<label for="role-a">Role</label>
+<select id="role-a">
+<option value="S">Setter (S)</option>
+<option value="OH">Outside (OH)</option>
+<option value="MB">Middle (MB)</option>
+<option value="OPP">Opposite (OPP)</option>
+<option value="L">Libero (L)</option>
+<option value="DS">Defensive Specialist (DS)</option>
+</select>
+</div>
+<div>
+<label for="spk-a">Spk (1–10)</label>
+<input id="spk-a" max="10" min="1" type="number" value="5">
+</input></div>
+<div>
+<label for="rcv-a">Rcv (1–10)</label>
+<input id="rcv-a" max="10" min="1" type="number" value="5">
+</input></div>
+</div>
+<div class="rowBtns">
+<button class="btn" id="btnAddA">
+<svg aria-hidden="true" class="icon" viewbox="0 0 24 24"><path d="M11 5h2v14h-2V5zm-6 6h14v2H5v-2z" fill="currentColor"></path></svg>
                 Add Player
               </button>
-              <button class="btn" id="btnAutoA" title="Pick best 6 by (spk+rcv) and assign to zones">
+<button class="btn" id="btnAutoA" title="Pick best 6 by (spk+rcv) and assign to zones">
                 ✨ Auto-Lineup
               </button>
-            </div>
-
-            <ul class="roster" id="roster-a" aria-label="Team A roster"></ul>
-
-            <div class="notice" id="warnA" role="alert" aria-live="polite"></div>
-
-            <div class="card" style="margin-top:12px; box-shadow:none;">
-              <div class="card-header">
-                <div>
-                  <h2>Lineup (Zones 1–6)</h2>
-                  <p>Assign exactly 6 unique players to zones.</p>
-                </div>
-                <div class="rowBtns">
-                  <button class="btn" id="btnClearA">Clear</button>
-                </div>
-              </div>
-              <div class="card-body">
-                <div class="lineupGrid" id="lineupA"></div>
-                <div class="rowBtns">
-                  <button class="btn primary" id="btnRotateA">Rotate</button>
-                  <button class="btn" id="btnUndoA">Undo</button>
-                  <button class="btn danger" id="btnResetA">Reset</button>
-                </div>
-                <div class="hint">Rotate is clockwise: 1→6→5→4→3→2→1. Rotation “1” means no rotations applied.</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        
+</div>
+<ul aria-label="Team A roster" class="roster" id="roster-a"></ul>
+<div aria-live="polite" class="notice" id="warnA" role="alert"></div>
+<div class="card" style="margin-top:12px; box-shadow:none;">
+<div class="card-header">
+<div>
+<h2>Lineup (Zones 1–6)</h2>
+<p>Assign exactly 6 unique players to zones.</p>
+</div>
+<div class="rowBtns">
+<button class="btn" id="btnClearA">Clear</button>
+</div>
+</div>
+<div class="card-body">
+<div class="lineupGrid" id="lineupA"></div>
+<div class="rowBtns">
+<button class="btn primary" id="btnRotateA">Rotate</button>
+<button class="btn" id="btnUndoA">Undo</button>
+<button class="btn danger" id="btnResetA">Reset</button>
+</div>
+<div class="hint">Rotate is clockwise: 1→6→5→4→3→2→1. Rotation “1” means no rotations applied.</div>
+</div>
+</div>
+</div>
+</section>
 <section class="card" id="panelB">
-          <div class="card-header">
-            <div>
-              <div class="teamTitle">
-                <span class="teamDot b" aria-hidden="true"></span>
-                <h2>Team B (Away)</h2>
-              </div>
-              <p>Add players, assign a 6-person lineup, rotate manually.</p>
-            </div>
-            <div class="teamMeta">
-              <span class="pill">Rot: <strong id="rotB" style="color:var(--text)">1</strong></span>
-              <span class="pill">Server: <strong id="serverB" style="color:var(--text)">—</strong></span>
-            </div>
-          </div>
-          <div class="card-body">
-            <div class="fieldRow2">
-              <div>
-                <label for="name-b">Name</label>
-                <input type="text" id="name-b" placeholder="Player name" autocomplete="off" />
-              </div>
-              <div>
-                <label for="jersey-b">Jersey #</label>
-                <input type="number" id="jersey-b" placeholder="Optional" min="0" max="99" />
-              </div>
-            </div>
-
-            <div class="fieldRow" style="margin-top:10px;">
-              <div>
-                <label for="role-b">Role</label>
-                <select id="role-b">
-                  <option value="S">Setter (S)</option>
-                  <option value="OH">Outside (OH)</option>
-                  <option value="MB">Middle (MB)</option>
-                  <option value="OPP">Opposite (OPP)</option>
-                  <option value="L">Libero (L)</option>
-                  <option value="DS">Defensive Specialist (DS)</option>
-                </select>
-              </div>
-              <div>
-                <label for="spk-b">Spk (1–10)</label>
-                <input type="number" id="spk-b" min="1" max="10" value="5" />
-              </div>
-              <div>
-                <label for="rcv-b">Rcv (1–10)</label>
-                <input type="number" id="rcv-b" min="1" max="10" value="5" />
-              </div>
-            </div>
-
-            <div class="rowBtns">
-              <button class="btn" id="btnAddB">
-                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11 5h2v14h-2V5zm-6 6h14v2H5v-2z"/></svg>
+<div class="card-header">
+<div>
+<div class="teamTitle">
+<span aria-hidden="true" class="teamDot b"></span>
+<h2 id="teamBHeader">Team B (Away)</h2>
+</div>
+<p>Add players, assign a 6-person lineup, rotate manually.</p>
+</div>
+<div class="teamMeta">
+<span class="pill">Rot: <strong id="rotB" style="color:var(--text)">1</strong></span>
+<span class="pill">Server: <strong id="serverB" style="color:var(--text)">—</strong></span>
+</div>
+</div>
+<div class="card-body">
+<div class="fieldRow2">
+<div>
+<label for="name-b">Name</label>
+<input autocomplete="off" id="name-b" placeholder="Player name" type="text"/>
+</div>
+<div>
+<label for="jersey-b">Jersey #</label>
+<input id="jersey-b" max="99" min="0" placeholder="Optional" type="number"/>
+</div>
+</div>
+<div class="fieldRow" style="margin-top:10px;">
+<div>
+<label for="role-b">Role</label>
+<select id="role-b">
+<option value="S">Setter (S)</option>
+<option value="OH">Outside (OH)</option>
+<option value="MB">Middle (MB)</option>
+<option value="OPP">Opposite (OPP)</option>
+<option value="L">Libero (L)</option>
+<option value="DS">Defensive Specialist (DS)</option>
+</select>
+</div>
+<div>
+<label for="spk-b">Spk (1–10)</label>
+<input id="spk-b" max="10" min="1" type="number" value="5"/>
+</div>
+<div>
+<label for="rcv-b">Rcv (1–10)</label>
+<input id="rcv-b" max="10" min="1" type="number" value="5"/>
+</div>
+</div>
+<div class="rowBtns">
+<button class="btn" id="btnAddB">
+<svg aria-hidden="true" class="icon" viewbox="0 0 24 24"><path d="M11 5h2v14h-2V5zm-6 6h14v2H5v-2z" fill="currentColor"></path></svg>
                 Add Player
               </button>
-              <button class="btn" id="btnAutoB" title="Pick best 6 by (spk+rcv) and assign to zones">
+<button class="btn" id="btnAutoB" title="Pick best 6 by (spk+rcv) and assign to zones">
                 ✨ Auto-Lineup
               </button>
-            </div>
-
-            <ul class="roster" id="roster-b" aria-label="Team B roster"></ul>
-
-            <div class="notice" id="warnB" role="alert" aria-live="polite"></div>
-
-            <div class="card" style="margin-top:12px; box-shadow:none;">
-              <div class="card-header">
-                <div>
-                  <h2>Lineup (Zones 1–6)</h2>
-                  <p>Assign exactly 6 unique players to zones.</p>
-                </div>
-                <div class="rowBtns">
-                  <button class="btn" id="btnClearB">Clear</button>
-                </div>
-              </div>
-              <div class="card-body">
-                <div class="lineupGrid" id="lineupB"></div>
-                <div class="rowBtns">
-                  <button class="btn primary" id="btnRotateB">Rotate</button>
-                  <button class="btn" id="btnUndoB">Undo</button>
-                  <button class="btn danger" id="btnResetB">Reset</button>
-                </div>
-                <div class="hint">Rotate is clockwise: 1→6→5→4→3→2→1. Rotation “1” means no rotations applied.</div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-
+</div>
+<ul aria-label="Team B roster" class="roster" id="roster-b"></ul>
+<div aria-live="polite" class="notice" id="warnB" role="alert"></div>
+<div class="card" style="margin-top:12px; box-shadow:none;">
+<div class="card-header">
+<div>
+<h2>Lineup (Zones 1–6)</h2>
+<p>Assign exactly 6 unique players to zones.</p>
+</div>
+<div class="rowBtns">
+<button class="btn" id="btnClearB">Clear</button>
+</div>
+</div>
+<div class="card-body">
+<div class="lineupGrid" id="lineupB"></div>
+<div class="rowBtns">
+<button class="btn primary" id="btnRotateB">Rotate</button>
+<button class="btn" id="btnUndoB">Undo</button>
+<button class="btn danger" id="btnResetB">Reset</button>
+</div>
+<div class="hint">Rotate is clockwise: 1→6→5→4→3→2→1. Rotation “1” means no rotations applied.</div>
+</div>
+</div>
+</div>
+</section>
+</div>
 <!-- SAVE / LOAD -->
-      <section class="card" style="margin-top:16px;">
-        <div class="card-header">
-          <div>
-            <h2>💾 Save / Load</h2>
-            <p>Export/import the full app state (rosters, lineups, rotations, score, settings).</p>
-          </div>
-          <div class="rowBtns no-print">
-            <button class="btn" id="btnCopyJson" title="Copy JSON">
-              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path fill="currentColor" d="M16 1H6a2 2 0 0 0-2 2v12h2V3h10V1zm3 4H10a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H10V7h9v14z"/>
-              </svg>
+<section class="card" style="margin-top:16px;">
+<div class="card-header">
+<div>
+<h2>💾 Save / Load</h2>
+<p>Export/import the full app state (rosters, lineups, rotations, score, settings).</p>
+</div>
+<div class="rowBtns no-print">
+<button class="btn" id="btnCopyJson" title="Copy JSON">
+<svg aria-hidden="true" class="icon" viewbox="0 0 24 24">
+<path d="M16 1H6a2 2 0 0 0-2 2v12h2V3h10V1zm3 4H10a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H10V7h9v14z" fill="currentColor"></path>
+</svg>
               Copy JSON
             </button>
-            <button class="btn" id="btnLoadJson" title="Load JSON from box">
-              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path fill="currentColor" d="M19 15v4H5v-4H3v6h18v-6h-2zM11 3h2v10l3-3 1.4 1.4L12 17l-5.4-5.6L8 10l3 3V3z"/>
-              </svg>
+<button class="btn" id="btnLoadJson" title="Load JSON from box">
+<svg aria-hidden="true" class="icon" viewbox="0 0 24 24">
+<path d="M19 15v4H5v-4H3v6h18v-6h-2zM11 3h2v10l3-3 1.4 1.4L12 17l-5.4-5.6L8 10l3 3V3z" fill="currentColor"></path>
+</svg>
               Load JSON
             </button>
-          </div>
-        </div>
-        <div class="card-body saveGrid">
-          <div>
-            <label for="jsonBox">JSON</label>
-            <textarea id="jsonBox" placeholder='Paste JSON here... (Export will also place JSON here)'></textarea>
-            <div class="ok" id="jsonOk" role="status" aria-live="polite"></div>
-            <div class="notice" id="jsonErr" role="alert" aria-live="polite"></div>
-          </div>
-          <div>
-            <div class="card" style="box-shadow:none;">
-              <div class="card-header">
-                <div>
-                  <h2>Notes</h2>
-                  <p>How rotations & serving work</p>
-                </div>
-              </div>
-              <div class="card-body">
-                <ul class="events" style="margin:0;">
-                  <li><b>Rotation mapping</b> is clockwise: <span class="mono">1→6→5→4→3→2→1</span>.</li>
-                  <li><b>Server</b> is whoever is currently in <b>zone 1</b> for the serving team.</li>
-                  <li><b>Simulation</b> uses rally scoring; if the receiving team wins a rally, it rotates (side-out) and gains the serve.</li>
-                </ul>
-                <div class="hint">Pro tip: After importing JSON, open Coach Sheet to print rotations 1–6.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    
-    </section>
-
-
-    <!-- LINEUP VIEW -->
-    <section id="viewLineup" class="view hidden" role="tabpanel" aria-labelledby="tabLineup">
-      <div class="grid-lineup">
-        <section class="card">
-          <div class="card-header">
-            <div>
-              <h2>🧩 Lineup Builder</h2>
-              <p>Create and optimize a starting 6 for your team.</p>
-            </div>
-            <div class="teamMeta no-print">
-              <div class="segmented" role="tablist" aria-label="Lineup team selector">
-                <button id="myTeamA" aria-selected="true" type="button">My Team: A</button>
-                <button id="myTeamB" aria-selected="false" type="button">My Team: B</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="card-body">
-            <div class="fieldRow2">
-              <div>
-                <label for="my-name">Name</label>
-                <input type="text" id="my-name" placeholder="Player name" autocomplete="off" />
-              </div>
-              <div>
-                <label for="my-jersey">Jersey #</label>
-                <input type="number" id="my-jersey" placeholder="Optional" min="0" max="99" />
-              </div>
-            </div>
-
-            <div class="fieldRow" style="margin-top:10px;">
-              <div>
-                <label for="my-role">Role</label>
-                <select id="my-role">
-                  <option value="S">Setter (S)</option>
-                  <option value="OH" selected>Outside (OH)</option>
-                  <option value="MB">Middle (MB)</option>
-                  <option value="OPP">Opposite (OPP)</option>
-                  <option value="L">Libero (L)</option>
-                  <option value="DS">Defensive Specialist (DS)</option>
-                </select>
-              </div>
-              <div>
-                <label for="my-spk">Spk (1–10)</label>
-                <input type="number" id="my-spk" min="1" max="10" value="5" />
-              </div>
-              <div>
-                <label for="my-rcv">Rcv (1–10)</label>
-                <input type="number" id="my-rcv" min="1" max="10" value="5" />
-              </div>
-            </div>
-
-            <div class="rowBtns">
-              <button class="btn" id="btnMyAdd">
-                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11 5h2v14h-2V5zm-6 6h14v2H5v-2z"/></svg>
+</div>
+</div>
+<div class="card-body saveGrid">
+<div>
+<label for="jsonBox">JSON</label>
+<textarea id="jsonBox" placeholder="Paste JSON here... (Export will also place JSON here)"></textarea>
+<div aria-live="polite" class="ok" id="jsonOk" role="status"></div>
+<div aria-live="polite" class="notice" id="jsonErr" role="alert"></div>
+</div>
+<div>
+<div class="card" style="box-shadow:none;">
+<div class="card-header">
+<div>
+<h2>Notes</h2>
+<p>How rotations &amp; serving work</p>
+</div>
+</div>
+<div class="card-body">
+<ul class="events" style="margin:0;">
+<li><b>Rotation mapping</b> is clockwise: <span class="mono">1→6→5→4→3→2→1</span>.</li>
+<li><b>Server</b> is whoever is currently in <b>zone 1</b> for the serving team.</li>
+<li><b>Simulation</b> uses rally scoring; if the receiving team wins a rally, it rotates (side-out) and gains the serve.</li>
+</ul>
+<div class="hint">Pro tip: After importing JSON, open Coach Sheet to print rotations 1–6.</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<!-- LINEUP VIEW -->
+<section aria-labelledby="tabLineup" class="view hidden" id="viewLineup" role="tabpanel">
+<div class="grid-lineup">
+<section class="card">
+<div class="card-header">
+<div>
+<h2>🧩 Lineup Builder</h2>
+<p>Create and optimize a starting 6 for your team.</p>
+<div class="hint" id="lineupEditingHint" style="margin-top:6px;"></div>
+</div>
+<div class="teamMeta no-print">
+<div aria-label="Lineup team selector" class="segmented teamPicker" role="tablist">
+<button aria-selected="true" class="teamPick" data-team="A" id="myTeamA" type="button"><span aria-hidden="true" class="teamDot a"></span><span id="myTeamALabel">My Team</span></button>
+<button aria-selected="false" class="teamPick" data-team="B" id="myTeamB" type="button"><span aria-hidden="true" class="teamDot b"></span><span id="myTeamBLabel">Other</span></button>
+</div>
+</div>
+</div>
+<div class="card-body">
+<div class="fieldRow2">
+<div>
+<label for="my-name">Name</label>
+<input autocomplete="off" id="my-name" placeholder="Player name" type="text"/>
+</div>
+<div>
+<label for="my-jersey">Jersey #</label>
+<input id="my-jersey" max="99" min="0" placeholder="Optional" type="number"/>
+</div>
+</div>
+<div class="fieldRow" style="margin-top:10px;">
+<div>
+<label for="my-role">Role</label>
+<select id="my-role">
+<option value="S">Setter (S)</option>
+<option selected="" value="OH">Outside (OH)</option>
+<option value="MB">Middle (MB)</option>
+<option value="OPP">Opposite (OPP)</option>
+<option value="L">Libero (L)</option>
+<option value="DS">Defensive Specialist (DS)</option>
+</select>
+</div>
+<div>
+<label for="my-spk">Spk (1–10)</label>
+<input id="my-spk" max="10" min="1" type="number" value="5"/>
+</div>
+<div>
+<label for="my-rcv">Rcv (1–10)</label>
+<input id="my-rcv" max="10" min="1" type="number" value="5"/>
+</div>
+</div>
+<div class="rowBtns">
+<button class="btn" id="btnMyAdd">
+<svg aria-hidden="true" class="icon" viewbox="0 0 24 24"><path d="M11 5h2v14h-2V5zm-6 6h14v2H5v-2z" fill="currentColor"></path></svg>
                 Add Player
               </button>
-              <button class="btn" id="btnMyAuto" title="Pick best 6 by (spk+rcv) and assign to zones">
+<button class="btn" id="btnMyAuto" title="Pick best 6 by (spk+rcv) and assign to zones">
                 ✨ Auto-Lineup
               </button>
-              <button class="btn primary" id="btnMyOptimize" title="Smarter role-based assignment (5–1 style)">
+<button class="btn primary" id="btnMyOptimize" title="Smarter role-based assignment (5–1 style)">
                 🧠 Optimize
               </button>
-            </div>
-
-            <ul class="roster" id="roster-my" aria-label="My team roster"></ul>
-            <div class="notice" id="warnMy" role="alert" aria-live="polite"></div>
-
-            <div class="card" style="margin-top:12px; box-shadow:none;">
-              <div class="card-header">
-                <div>
-                  <h2>My Starting 6 (Zones 1–6)</h2>
-                  <p>Tip: For many teams, a simple 5–1 start is <b>Setter in zone 1</b>, <b>Opposite in zone 2</b>.</p>
-                </div>
-                <div class="rowBtns">
-                  <button class="btn" id="btnMyClear">Clear</button>
-                </div>
-              </div>
-              <div class="card-body">
-                <div class="lineupGrid" id="lineupMy"></div>
-                <div class="rowBtns">
-                  <button class="btn primary" id="btnMyRotate">Rotate</button>
-                  <button class="btn" id="btnMyUndo">Undo</button>
-                  <button class="btn danger" id="btnMyReset">Reset</button>
-                </div>
-                <div class="hint">Rotation is clockwise: <span class="mono">1→6→5→4→3→2→1</span>. Zone <b>1</b> is always the server.</div>
-              </div>
-            </div>
-
-            <div class="rowBtns" style="margin-top:12px;">
-              <button class="btn" id="lineupGoHome">🏠 Back to Home</button>
-              <button class="btn" id="lineupGoSim">🎮 Run Simulation</button>
-            </div>
-          </div>
-        </section>
-
-        
-        <section class="card">
-          <div class="card-header">
-            <div>
-              <h2>🏐 Court Preview + Insights</h2>
-              <p>See where your 6 are on the court (including rotation) + quick stats.</p>
-            </div>
-            <div class="teamMeta">
-              <span class="pill">My team: <strong id="myTeamLabel" style="color:var(--text)">A</strong></span>
-              <span class="pill">Rot: <strong id="myRotLabel" style="color:var(--text)">1</strong></span>
-            </div>
-          </div>
-
-          <div class="card-body">
-            <div class="lineupCourt myA" id="myCourtPreview" aria-label="Lineup court preview">
-              <div class="lcGrid" role="group" aria-label="Zones 4 3 2 / 5 6 1">
-                <div class="lcZone" data-zone="4">
-                  <div class="lcZoneLabel">4 <span>LF</span></div>
-                  <div class="lcToken empty" id="lc-token-4">
-                    <div class="lcName" id="lc-name-4">— Empty</div>
-                    <div class="lcRole" id="lc-role-4">Pick a player</div>
-                  </div>
-                </div>
-                <div class="lcZone" data-zone="3">
-                  <div class="lcZoneLabel">3 <span>MF</span></div>
-                  <div class="lcToken empty" id="lc-token-3">
-                    <div class="lcName" id="lc-name-3">— Empty</div>
-                    <div class="lcRole" id="lc-role-3">Pick a player</div>
-                  </div>
-                </div>
-                <div class="lcZone" data-zone="2">
-                  <div class="lcZoneLabel">2 <span>RF</span></div>
-                  <div class="lcToken empty" id="lc-token-2">
-                    <div class="lcName" id="lc-name-2">— Empty</div>
-                    <div class="lcRole" id="lc-role-2">Pick a player</div>
-                  </div>
-                </div>
-
-                <div class="lcZone" data-zone="5">
-                  <div class="lcZoneLabel">5 <span>LB</span></div>
-                  <div class="lcToken empty" id="lc-token-5">
-                    <div class="lcName" id="lc-name-5">— Empty</div>
-                    <div class="lcRole" id="lc-role-5">Pick a player</div>
-                  </div>
-                </div>
-                <div class="lcZone" data-zone="6">
-                  <div class="lcZoneLabel">6 <span>MB</span></div>
-                  <div class="lcToken empty" id="lc-token-6">
-                    <div class="lcName" id="lc-name-6">— Empty</div>
-                    <div class="lcRole" id="lc-role-6">Pick a player</div>
-                  </div>
-                </div>
-                <div class="lcZone" data-zone="1">
-                  <div class="lcZoneLabel">1 <span>RB</span></div>
-                  <div class="lcToken empty lcServing" id="lc-token-1">
-                    <div class="lcName" id="lc-name-1">— Empty</div>
-                    <div class="lcRole" id="lc-role-1">Server zone</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="hint" style="margin-top:10px;">
+</div>
+<ul aria-label="My team roster" class="roster" id="roster-my"></ul>
+<div aria-live="polite" class="notice" id="warnMy" role="alert"></div>
+<div class="card" style="margin-top:12px; box-shadow:none;">
+<div class="card-header">
+<div>
+<h2>My Starting 6 (Zones 1–6)</h2>
+<p>Tip: For many teams, a simple 5–1 start is <b>Setter in zone 1</b>, <b>Opposite in zone 2</b>.</p>
+</div>
+<div class="rowBtns">
+<button class="btn" id="btnMyClear">Clear</button>
+</div>
+</div>
+<div class="card-body">
+<div class="lineupGrid" id="lineupMy"></div>
+<!-- rotation controls moved under court preview -->
+<div class="hint">Rotation is clockwise: <span class="mono">1→6→5→4→3→2→1</span>. Zone <b>1</b> is always the server.</div>
+</div>
+</div>
+<div class="rowBtns" style="margin-top:12px;">
+<button class="btn" id="lineupGoHome">🏠 Back to Home</button>
+<button class="btn" id="lineupGoSim">🎮 Run Simulation</button>
+</div>
+</div>
+</section>
+<section class="card">
+<div class="card-header">
+<div>
+<h2>🏐 Court Preview + Insights</h2>
+<p>See where your 6 are on the court (including rotation) + quick stats.</p>
+</div>
+<div class="teamMeta">
+<span class="pill">My team: <strong id="myTeamLabel" style="color:var(--text)">A</strong></span>
+<span class="pill">Rot: <strong id="myRotLabel" style="color:var(--text)">1</strong></span>
+</div>
+</div>
+<div class="card-body">
+<div aria-label="Lineup court preview" class="lineupCourt myA" id="myCourtPreview">
+<div aria-label="Zones 4 3 2 / 5 6 1" class="lcGrid" role="group">
+<div class="lcZone" data-zone="4">
+<div class="lcZoneLabel">4 <span>LF</span></div>
+<div class="lcToken empty" id="lc-token-4">
+<div class="lcName" id="lc-name-4">— Empty</div>
+<div class="lcRole" id="lc-role-4">Pick a player</div>
+</div>
+</div>
+<div class="lcZone" data-zone="3">
+<div class="lcZoneLabel">3 <span>MF</span></div>
+<div class="lcToken empty" id="lc-token-3">
+<div class="lcName" id="lc-name-3">— Empty</div>
+<div class="lcRole" id="lc-role-3">Pick a player</div>
+</div>
+</div>
+<div class="lcZone" data-zone="2">
+<div class="lcZoneLabel">2 <span>RF</span></div>
+<div class="lcToken empty" id="lc-token-2">
+<div class="lcName" id="lc-name-2">— Empty</div>
+<div class="lcRole" id="lc-role-2">Pick a player</div>
+</div>
+</div>
+<div class="lcZone" data-zone="5">
+<div class="lcZoneLabel">5 <span>LB</span></div>
+<div class="lcToken empty" id="lc-token-5">
+<div class="lcName" id="lc-name-5">— Empty</div>
+<div class="lcRole" id="lc-role-5">Pick a player</div>
+</div>
+</div>
+<div class="lcZone" data-zone="6">
+<div class="lcZoneLabel">6 <span>MB</span></div>
+<div class="lcToken empty" id="lc-token-6">
+<div class="lcName" id="lc-name-6">— Empty</div>
+<div class="lcRole" id="lc-role-6">Pick a player</div>
+</div>
+</div>
+<div class="lcZone" data-zone="1">
+<div class="lcZoneLabel">1 <span>RB</span></div>
+<div class="lcToken empty lcServing" id="lc-token-1">
+<div class="lcName" id="lc-name-1">— Empty</div>
+<div class="lcRole" id="lc-role-1">Server zone</div>
+</div>
+</div>
+</div>
+</div>
+<div class="rowBtns" id="myCourtControls" style="margin-top:12px; justify-content:center; flex-wrap:wrap;">
+<button class="btn primary" id="btnMyRotate">
+<svg aria-hidden="true" class="icon" viewbox="0 0 24 24"><path d="M12 6V3L8 7l4 4V8c2.76 0 5 2.24 5 5a5 5 0 0 1-8.66 3.54l-1.42 1.42A7 7 0 1 0 12 6z" fill="currentColor"></path></svg>
+                Rotate
+              </button>
+<button class="btn" id="btnMyUndo">
+<svg aria-hidden="true" class="icon" viewbox="0 0 24 24"><path d="M12 5c-4.42 0-8 3.58-8 8h2a6 6 0 0 1 10.24-4.24L14 11h7V4l-2.34 2.34A7.96 7.96 0 0 0 12 5z" fill="currentColor"></path></svg>
+                Undo
+              </button>
+<button class="btn danger" id="btnMyReset">
+<svg aria-hidden="true" class="icon" viewbox="0 0 24 24"><path d="M12 5V2L8 6l4 4V7c3.31 0 6 2.69 6 6a6 6 0 0 1-10.39 4.08l-1.42 1.42A8 8 0 1 0 12 5z" fill="currentColor"></path></svg>
+                Reset
+              </button>
+</div>
+<div class="hint" style="margin-top:10px;">
               Front row is zones <b>4–3–2</b> (near the net). Back row is <b>5–6–1</b>. Zone <b>1</b> is the server.
             </div>
-
-            <div style="height:12px;"></div>
-            <div id="myInsights"><div class="hint">Assign 6 players to zones to see insights.</div></div>
-          </div>
-        </section>
-
-      </div>
-    </section>
-
-
-    <!-- SIMULATION VIEW -->
-    <section id="viewSim" class="view hidden" role="tabpanel" aria-labelledby="tabSim">
-      <section class="card" style="margin-bottom:16px;">
-        <div class="card-header">
-          <div>
-            <h2>🎮 Simulation</h2>
-            <p>Rally scoring + side-out rotations. Uses your current Team A / Team B lineups.</p>
-          </div>
-          <div class="rowBtns no-print">
-            <button class="btn" id="simGoHome">🏠 Back to Home</button>
-          </div>
-        </div>
-        <div class="card-body">
-          <ul class="events" style="margin:0;">
-            <li>Receiver wins rally → <b>side-out</b>: they rotate and gain the serve.</li>
-            <li>Game ends at target points with a <b>2-point lead</b>.</li>
-          </ul>
-        </div>
-      </section>
-
-      <section class="card" id="panelCourt">
-          <div class="card-header">
-            <div>
-              <h2>🏟️ Court + Match Simulation</h2>
-              <p>Simulation uses rally scoring + realistic rotations on side-out (receiver wins the rally).</p>
-            </div>
-            <div class="teamMeta">
-              <label class="toggle" title="Show/hide zone labels on the court">
-                <input type="checkbox" id="toggleZones" checked />
-                <span>Zone labels</span>
-              </label>
-              <label class="toggle" title="Show/hide role chips on tokens">
-                <input type="checkbox" id="toggleRoles" checked />
-                <span>Role chips</span>
-              </label>
-            </div>
-          </div>
-          <div class="card-body">
-            <div class="notice" id="simWarn" role="alert" aria-live="polite"></div>
-            <div class="scoreboard" role="group" aria-label="Scoreboard">
-              <div class="scoreSide">
-                <div class="teamLabel"><span class="teamDot a"></span> Team A</div>
-                <div class="scoreNum a" id="score-a-display">0</div>
-              </div>
-
-              <div class="centerStatus">
-                <div class="vs">VS</div>
-                <div class="status" id="sim-status">Waiting to start</div>
-                <div class="servePill" id="serve-pill">🏐 Serve: <span id="serve-team">A</span> — <span id="serve-player">—</span></div>
-              </div>
-
-              <div class="scoreSide right">
-                <div class="teamLabel">Team B <span class="teamDot b"></span></div>
-                <div class="scoreNum b" id="score-b-display">0</div>
-              </div>
-            </div>
-
-            <div class="courtWrap">
-              <div class="controlsRow no-print">
-                <div class="controlsLeft">
-                  <button class="btn primary" id="btn-sim">🎮 Play Simulation</button>
-                  <button class="btn" id="btn-stop">Stop</button>
-                  <button class="btn danger" id="btn-reset-match">Reset Match</button>
-                </div>
-                <div class="controlsRight">
-                  <div style="min-width:150px;">
-                    <label for="targetPoints" style="margin:0 0 6px 0;">Play to</label>
-                    <input id="targetPoints" type="number" min="1" max="99" value="15" />
-                  </div>
-                  <div style="min-width:170px;">
-                    <label for="speed" style="margin:0 0 6px 0;">Speed</label>
-                    <select id="speed">
-                      <option value="0.75">Fast</option>
-                      <option value="1" selected>Normal</option>
-                      <option value="1.35">Slow</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <div class="court-container" id="court" aria-label="Full volleyball court">
-                <div class="center-line" aria-hidden="true"></div>
-                <div class="net" aria-hidden="true"></div>
-                <div class="attack-line-top" aria-hidden="true"></div>
-                <div class="attack-line-bot" aria-hidden="true"></div>
-
-                <!-- Zone labels (12) injected via JS -->
-                <div id="zoneLabels"></div>
-
-                <!-- Ball -->
-                <div class="game-ball" id="ball">🏐</div>
-
-                <!-- Tokens: slots 1..6 per team -->
-                <div class="player-token team-a-token" id="a-token-1"><div class="token-jersey" id="a-jersey-1"></div><div class="token-name" id="a-name-1"></div><div class="token-role" id="a-role-1"></div></div>
-                <div class="player-token team-a-token" id="a-token-2"><div class="token-jersey" id="a-jersey-2"></div><div class="token-name" id="a-name-2"></div><div class="token-role" id="a-role-2"></div></div>
-                <div class="player-token team-a-token" id="a-token-3"><div class="token-jersey" id="a-jersey-3"></div><div class="token-name" id="a-name-3"></div><div class="token-role" id="a-role-3"></div></div>
-                <div class="player-token team-a-token" id="a-token-4"><div class="token-jersey" id="a-jersey-4"></div><div class="token-name" id="a-name-4"></div><div class="token-role" id="a-role-4"></div></div>
-                <div class="player-token team-a-token" id="a-token-5"><div class="token-jersey" id="a-jersey-5"></div><div class="token-name" id="a-name-5"></div><div class="token-role" id="a-role-5"></div></div>
-                <div class="player-token team-a-token" id="a-token-6"><div class="token-jersey" id="a-jersey-6"></div><div class="token-name" id="a-name-6"></div><div class="token-role" id="a-role-6"></div></div>
-
-                <div class="player-token team-b-token" id="b-token-1"><div class="token-jersey" id="b-jersey-1"></div><div class="token-name" id="b-name-1"></div><div class="token-role" id="b-role-1"></div></div>
-                <div class="player-token team-b-token" id="b-token-2"><div class="token-jersey" id="b-jersey-2"></div><div class="token-name" id="b-name-2"></div><div class="token-role" id="b-role-2"></div></div>
-                <div class="player-token team-b-token" id="b-token-3"><div class="token-jersey" id="b-jersey-3"></div><div class="token-name" id="b-name-3"></div><div class="token-role" id="b-role-3"></div></div>
-                <div class="player-token team-b-token" id="b-token-4"><div class="token-jersey" id="b-jersey-4"></div><div class="token-name" id="b-name-4"></div><div class="token-role" id="b-role-4"></div></div>
-                <div class="player-token team-b-token" id="b-token-5"><div class="token-jersey" id="b-jersey-5"></div><div class="token-name" id="b-name-5"></div><div class="token-role" id="b-role-5"></div></div>
-                <div class="player-token team-b-token" id="b-token-6"><div class="token-jersey" id="b-jersey-6"></div><div class="token-name" id="b-name-6"></div><div class="token-role" id="b-role-6"></div></div>
-              </div>
-
-              <div class="eventLog">
-                <h3>Last rallies</h3>
-                <ul class="events" id="events"></ul>
-                <div class="hint mono">Tip: Use Auto-Lineup on both teams, then press Play. Manual rotate buttons also work anytime.</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        
-    </section>
-
+<div style="height:12px;"></div>
+<div id="myInsights"><div class="hint">Assign 6 players to zones to see insights.</div></div>
+</div>
+</section>
+</div>
+</section>
+<!-- SIMULATION VIEW -->
+<section aria-labelledby="tabSim" class="view hidden" id="viewSim" role="tabpanel">
+<section class="card" style="margin-bottom:16px;">
+<div class="card-header">
+<div>
+<h2>🎮 Simulation</h2>
+<div class="hint"><span class="teamBadge both" id="simTeamsBadge"></span></div>
+<p>Rally scoring + side-out rotations. Uses your current Team A / Team B lineups.</p>
+</div>
+<div class="rowBtns no-print">
+<button class="btn" id="simGoHome">🏠 Back to Home</button>
+</div>
+</div>
+<div class="card-body">
+<ul class="events" style="margin:0;">
+<li>Receiver wins rally → <b>side-out</b>: they rotate and gain the serve.</li>
+<li>Game ends at target points with a <b>2-point lead</b>.</li>
+</ul>
+</div>
+</section>
+<section class="card" id="panelCourt">
+<div class="card-header">
+<div>
+<h2>🏟️ Court + Match Simulation</h2>
+<p>Simulation uses rally scoring + realistic rotations on side-out (receiver wins the rally).</p>
+</div>
+<div class="teamMeta">
+<label class="toggle" title="Show/hide zone labels on the court">
+<input checked="" id="toggleZones" type="checkbox"/>
+<span>Zone labels</span>
+</label>
+<label class="toggle" title="Show/hide role chips on tokens">
+<input checked="" id="toggleRoles" type="checkbox"/>
+<span>Role chips</span>
+</label>
+</div>
+</div>
+<div class="card-body">
+<div aria-live="polite" class="notice" id="simWarn" role="alert"></div>
+<div aria-label="Scoreboard" class="scoreboard" role="group">
+<div class="scoreSide">
+<div class="teamLabel"><span class="teamDot a"></span> <span id="simTeamALabel">Team A</span></div>
+<div class="scoreNum a" id="score-a-display">0</div>
+</div>
+<div class="centerStatus">
+<div class="vs">VS</div>
+<div class="status" id="sim-status">Waiting to start</div>
+<div class="servePill" id="serve-pill">🏐 Serve: <span id="serve-team">A</span> — <span id="serve-player">—</span></div>
+</div>
+<div class="scoreSide right">
+<div class="teamLabel"><span id="simTeamBLabel">Team B</span> <span class="teamDot b"></span></div>
+<div class="scoreNum b" id="score-b-display">0</div>
+</div>
+</div>
+<div class="courtWrap">
+<div class="controlsRow no-print">
+<div class="controlsLeft">
+<button class="btn primary" id="btn-sim">🎮 Play Simulation</button>
+<button class="btn" id="btn-stop">Stop</button>
+<button class="btn danger" id="btn-reset-match">Reset Match</button>
+</div>
+<div class="controlsRight">
+<div style="min-width:150px;">
+<label for="targetPoints" style="margin:0 0 6px 0;">Play to</label>
+<input id="targetPoints" max="99" min="1" type="number" value="15"/>
+</div>
+<div style="min-width:170px;">
+<label for="speed" style="margin:0 0 6px 0;">Speed</label>
+<select id="speed">
+<option value="0.75">Fast</option>
+<option selected="" value="1">Normal</option>
+<option value="1.35">Slow</option>
+</select>
+</div>
+</div>
+</div>
+<div aria-label="Full volleyball court" class="court-container" id="court">
+<div aria-hidden="true" class="center-line"></div>
+<div aria-hidden="true" class="net"></div>
+<div aria-hidden="true" class="attack-line-top"></div>
+<div aria-hidden="true" class="attack-line-bot"></div>
+<!-- Zone labels (12) injected via JS -->
+<div id="zoneLabels"></div>
+<!-- Ball -->
+<div class="game-ball" id="ball">🏐</div>
+<!-- Tokens: slots 1..6 per team -->
+<div class="player-token team-a-token" id="a-token-1"><div class="token-jersey" id="a-jersey-1"></div><div class="token-name" id="a-name-1"></div><div class="token-role" id="a-role-1"></div></div>
+<div class="player-token team-a-token" id="a-token-2"><div class="token-jersey" id="a-jersey-2"></div><div class="token-name" id="a-name-2"></div><div class="token-role" id="a-role-2"></div></div>
+<div class="player-token team-a-token" id="a-token-3"><div class="token-jersey" id="a-jersey-3"></div><div class="token-name" id="a-name-3"></div><div class="token-role" id="a-role-3"></div></div>
+<div class="player-token team-a-token" id="a-token-4"><div class="token-jersey" id="a-jersey-4"></div><div class="token-name" id="a-name-4"></div><div class="token-role" id="a-role-4"></div></div>
+<div class="player-token team-a-token" id="a-token-5"><div class="token-jersey" id="a-jersey-5"></div><div class="token-name" id="a-name-5"></div><div class="token-role" id="a-role-5"></div></div>
+<div class="player-token team-a-token" id="a-token-6"><div class="token-jersey" id="a-jersey-6"></div><div class="token-name" id="a-name-6"></div><div class="token-role" id="a-role-6"></div></div>
+<div class="player-token team-b-token" id="b-token-1"><div class="token-jersey" id="b-jersey-1"></div><div class="token-name" id="b-name-1"></div><div class="token-role" id="b-role-1"></div></div>
+<div class="player-token team-b-token" id="b-token-2"><div class="token-jersey" id="b-jersey-2"></div><div class="token-name" id="b-name-2"></div><div class="token-role" id="b-role-2"></div></div>
+<div class="player-token team-b-token" id="b-token-3"><div class="token-jersey" id="b-jersey-3"></div><div class="token-name" id="b-name-3"></div><div class="token-role" id="b-role-3"></div></div>
+<div class="player-token team-b-token" id="b-token-4"><div class="token-jersey" id="b-jersey-4"></div><div class="token-name" id="b-name-4"></div><div class="token-role" id="b-role-4"></div></div>
+<div class="player-token team-b-token" id="b-token-5"><div class="token-jersey" id="b-jersey-5"></div><div class="token-name" id="b-name-5"></div><div class="token-role" id="b-role-5"></div></div>
+<div class="player-token team-b-token" id="b-token-6"><div class="token-jersey" id="b-jersey-6"></div><div class="token-name" id="b-name-6"></div><div class="token-role" id="b-role-6"></div></div>
+</div>
+<div class="eventLog">
+<h3>Last rallies</h3>
+<ul class="events" id="events"></ul>
+<div class="hint mono">Tip: Use Auto-Lineup on both teams, then press Play. Manual rotate buttons also work anytime.</div>
+</div>
+</div>
+</div>
+</section>
+</section>
 <!-- COACH SHEET VIEW -->
-    <section id="viewCoach" class="view hidden" role="tabpanel" aria-labelledby="tabCoach">
-      <section class="card">
-        <div class="card-header">
-          <div>
-            <h2>📝 Coach Sheet (Rotations 1–6)</h2>
-            <p>Printable reference from the current lineup + current rotation.</p>
-          </div>
-          <div class="coachTop no-print">
-            <div class="segmented" role="tablist" aria-label="Coach team selector">
-              <button id="coachTeamA" aria-selected="true" type="button">Team A</button>
-              <button id="coachTeamB" aria-selected="false" type="button">Team B</button>
-            </div>
-            <div class="rowBtns">
-              <button class="btn" id="btnPrint">
-                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-                  <path fill="currentColor" d="M6 7V3h12v4H6zm12 2h1a3 3 0 0 1 3 3v5h-4v4H6v-4H2v-5a3 3 0 0 1 3-3h1v2h12V9zM8 19v2h8v-2H8z"/>
-                </svg>
+<section aria-labelledby="tabCoach" class="view hidden" id="viewCoach" role="tabpanel">
+<section class="card">
+<div class="card-header">
+<div>
+<h2>📝 Coach Sheet (Rotations 1–6)</h2>
+<p>Printable reference from the current lineup + current rotation.</p>
+</div>
+<div class="coachTop no-print">
+<div aria-label="Coach team selector" class="segmented coachPicker" role="tablist">
+<button aria-selected="true" class="coachPick a" id="coachTeamA" type="button"><span aria-hidden="true" class="teamDot a"></span><span id="coachTeamALabel">Team A</span></button>
+<button aria-selected="false" class="coachPick b" id="coachTeamB" type="button"><span aria-hidden="true" class="teamDot b"></span><span id="coachTeamBLabel">Team B</span></button>
+</div>
+<div class="rowBtns">
+<button class="btn" id="btnPrint">
+<svg aria-hidden="true" class="icon" viewbox="0 0 24 24">
+<path d="M6 7V3h12v4H6zm12 2h1a3 3 0 0 1 3 3v5h-4v4H6v-4H2v-5a3 3 0 0 1 3-3h1v2h12V9zM8 19v2h8v-2H8z" fill="currentColor"></path>
+</svg>
                 Print
               </button>
-            </div>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="notice" id="coachWarn" role="alert" aria-live="polite"></div>
-          <div class="coachGrid" id="coachGrid"></div>
-        </div>
-      </section>
-    </section>
-  
-    <!-- RULES VIEW -->
-    <section id="viewRules" class="view hidden" role="tabpanel" aria-labelledby="tabRules">
-      <section class="card">
-        <div class="card-header">
-          <div>
-            <h2>Volleyball Rules & Tips</h2>
-            <p>Fast refresher (simplified) + practical coaching reminders.</p>
-          </div>
-          <div class="rowBtns no-print">
-            <button class="btn" id="rulesGoHome">🏠 Back to Home</button>
-          </div>
-        </div>
-        <div class="card-body">
-          <details open>
-            <summary>Scoring & sets <span class="summaryHint">rally scoring</span></summary>
-            <div class="ruleBody">
-              <ul class="events" style="margin:0;">
-                <li>Every rally is a point (rally scoring).</li>
-                <li>Most indoor matches play best-of-5 sets (first to 25; 5th set often to 15), win by 2.</li>
-                <li>After each rally, the team that won the rally serves next.</li>
-              </ul>
-            </div>
-          </details>
-
-          <details>
-            <summary>Rotation basics <span class="summaryHint">clockwise</span></summary>
-            <div class="ruleBody">
-              <p>Teams rotate <b>only</b> when they win a rally as the <b>receiving</b> team (a side-out). Rotation is clockwise:</p>
-              <p class="mono">1→6→5→4→3→2→1</p>
-              <ul class="events" style="margin:0;">
-                <li>Zone 1 = Right Back (server).</li>
-                <li>Front row zones: 2, 3, 4. Back row zones: 1, 6, 5.</li>
-                <li>After serve, players can move to their base/defensive positions (as long as they were legal at contact).</li>
-              </ul>
-            </div>
-          </details>
-
-          <details>
-            <summary>Positions (simple) <span class="summaryHint">roles</span></summary>
-            <div class="ruleBody">
-              <ul class="events" style="margin:0;">
-                <li><b>Setter (S)</b>: runs the offense, often wants touches 2nd ball.</li>
-                <li><b>Outside (OH)</b>: primary passer + attacker on left side.</li>
-                <li><b>Middle (MB)</b>: quick attacker + main blocker, usually in the middle front zones.</li>
-                <li><b>Opposite (OPP)</b>: right-side attacker, commonly blocks the opponent’s OH.</li>
-                <li><b>Libero (L) / DS</b>: back-row defense + passing; usually not a primary attacker.</li>
-              </ul>
-            </div>
-          </details>
-
-          <details>
-            <summary>Libero notes <span class="summaryHint">common rules</span></summary>
-            <div class="ruleBody">
-              <ul class="events" style="margin:0;">
-                <li>Libero is a defensive specialist and wears a different jersey in most rulesets.</li>
-                <li>Often replaces middles in the back row to improve passing/defense.</li>
-                <li>Libero generally cannot complete an attack hit above the net from the front zone.</li>
-              </ul>
-              <p class="hint">Rules vary by league — treat this as a quick reminder, not an official rulebook.</p>
-            </div>
-          </details>
-
-          <details>
-            <summary>Serving & common faults <span class="summaryHint">quick list</span></summary>
-            <div class="ruleBody">
-              <ul class="events" style="margin:0;">
-                <li>Server must contact the ball behind the end line; foot faults are called in many leagues.</li>
-                <li>Double contact on the 1st ball is usually more lenient than on the 2nd contact (depends on league).</li>
-                <li>Net touches, center-line faults, illegal back-row attacks, and rotational faults are common calls.</li>
-              </ul>
-            </div>
-          </details>
-
-          <details>
-            <summary>Practical tips <span class="summaryHint">coach</span></summary>
-            <div class="ruleBody">
-              <ul class="events" style="margin:0;">
-                <li><b>Serve order</b>: your serve order is simply zones 1→2→3→4→5→6.</li>
-                <li><b>Keep two passers</b> in serve receive whenever possible.</li>
-                <li><b>Know your mismatch</b>: if your OPP is strong, try to keep them against their OH in the front row.</li>
-                <li><b>Simple first</b>: run a clean free-ball plan (pass → set → controlled swing) before adding complex plays.</li>
-              </ul>
-            </div>
-          </details>
-
-        </div>
-      </section>
-    </section>
-
-
-  </main>
 </div>
+</div>
+</div>
+<div class="card-body">
+<div aria-live="polite" class="notice" id="coachWarn" role="alert"></div>
+<div class="coachGrid" id="coachGrid"></div>
+</div>
+</section>
+</section>
+<!-- RULES VIEW -->
+<section aria-labelledby="tabRules" class="view hidden" id="viewRules" role="tabpanel">
+<section class="card">
+<div class="card-header">
+<div>
+<h2>Volleyball Rules &amp; Tips</h2>
+<p>Fast refresher (simplified) + practical coaching reminders.</p>
+</div>
+<div class="rowBtns no-print">
+<button class="btn" id="rulesGoHome">🏠 Back to Home</button>
+</div>
+</div>
+<div class="card-body">
+<details open="">
+<summary>Scoring &amp; sets <span class="summaryHint">rally scoring</span></summary>
+<div class="ruleBody">
+<ul class="events" style="margin:0;">
+<li>Every rally is a point (rally scoring).</li>
+<li>Most indoor matches play best-of-5 sets (first to 25; 5th set often to 15), win by 2.</li>
+<li>After each rally, the team that won the rally serves next.</li>
+</ul>
+</div>
+</details>
+<details>
+<summary>Rotation basics <span class="summaryHint">clockwise</span></summary>
+<div class="ruleBody">
+<p>Teams rotate <b>only</b> when they win a rally as the <b>receiving</b> team (a side-out). Rotation is clockwise:</p>
+<p class="mono">1→6→5→4→3→2→1</p>
+<ul class="events" style="margin:0;">
+<li>Zone 1 = Right Back (server).</li>
+<li>Front row zones: 2, 3, 4. Back row zones: 1, 6, 5.</li>
+<li>After serve, players can move to their base/defensive positions (as long as they were legal at contact).</li>
+</ul>
+</div>
+</details>
+<details>
+<summary>Positions (simple) <span class="summaryHint">roles</span></summary>
+<div class="ruleBody">
+<ul class="events" style="margin:0;">
+<li><b>Setter (S)</b>: runs the offense, often wants touches 2nd ball.</li>
+<li><b>Outside (OH)</b>: primary passer + attacker on left side.</li>
+<li><b>Middle (MB)</b>: quick attacker + main blocker, usually in the middle front zones.</li>
+<li><b>Opposite (OPP)</b>: right-side attacker, commonly blocks the opponent’s OH.</li>
+<li><b>Libero (L) / DS</b>: back-row defense + passing; usually not a primary attacker.</li>
+</ul>
+</div>
+</details>
+<details>
+<summary>Libero notes <span class="summaryHint">common rules</span></summary>
+<div class="ruleBody">
+<ul class="events" style="margin:0;">
+<li>Libero is a defensive specialist and wears a different jersey in most rulesets.</li>
+<li>Often replaces middles in the back row to improve passing/defense.</li>
+<li>Libero generally cannot complete an attack hit above the net from the front zone.</li>
+</ul>
+<p class="hint">Rules vary by league — treat this as a quick reminder, not an official rulebook.</p>
+</div>
+</details>
+<details>
+<summary>Serving &amp; common faults <span class="summaryHint">quick list</span></summary>
+<div class="ruleBody">
+<ul class="events" style="margin:0;">
+<li>Server must contact the ball behind the end line; foot faults are called in many leagues.</li>
+<li>Double contact on the 1st ball is usually more lenient than on the 2nd contact (depends on league).</li>
+<li>Net touches, center-line faults, illegal back-row attacks, and rotational faults are common calls.</li>
+</ul>
+</div>
+</details>
+<details>
+<summary>Practical tips <span class="summaryHint">coach</span></summary>
+<div class="ruleBody">
+<ul class="events" style="margin:0;">
+<li><b>Serve order</b>: your serve order is simply zones 1→2→3→4→5→6.</li>
+<li><b>Keep two passers</b> in serve receive whenever possible.</li>
+<li><b>Know your mismatch</b>: if your OPP is strong, try to keep them against their OH in the front row.</li>
+<li><b>Simple first</b>: run a clean free-ball plan (pass → set → controlled swing) before adding complex plays.</li>
+</ul>
+</div>
+</details>
+</div>
+</section>
+</section>
+<!-- LEAGUE SPLIT CALCULATOR VIEW -->
+<section aria-labelledby="tabSplit" class="view hidden" id="viewSplit" role="tabpanel">
+<section class="card" style="margin-bottom:16px;">
+<div class="card-header">
+<div>
+<h2>🧾 League Split Calculator</h2>
+<p>Track who paid, how much each player owes, and who the captain should pay back (Team A + Team B).</p>
+</div>
+<div class="rowBtns no-print">
+<button class="btn" id="splitGoHome">🏠 Back to Home</button>
+<button class="btn" id="splitCopySummary">
+<svg aria-hidden="true" class="icon" viewbox="0 0 24 24">
+<path d="M16 1H6a2 2 0 0 0-2 2v12h2V3h10V1zm3 4H10a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H10V7h9v14z" fill="currentColor"></path>
+</svg>
+              Copy Summary
+            </button>
+</div>
+</div>
+<div class="card-body">
+<div class="hint">
+            How it works: set each team's <b>Total Team Fee</b> → add players and the <b>amount they already paid</b> → the app calculates a fair <b>per-player share</b>. 
+            If a player paid <b>less</b> than their share, they <b>owe the captain</b>. If they paid <b>more</b>, the <b>captain should pay them back</b>.
+          </div>
+</div>
+</section>
+<div class="splitGrid">
+<section class="card splitTeamCard" data-team="A">
+<div class="card-header">
+<div class="splitTop">
+<div class="teamTitle">
+<span aria-hidden="true" class="teamDot a"></span>
+<div>
+<h2><span aria-hidden="true" class="teamDot a"></span> <span id="splitTeamALabel">Team A</span> Split</h2>
+<p>Enter fee + payments for Team A.</p>
+</div>
+</div>
+<div class="rowBtns no-print">
+<button class="btn" id="splitImportA" title="Import roster names into split list">↩️ Import roster</button>
+<button class="btn" id="splitAddA">➕ Add player</button>
+</div>
+</div>
+</div>
+<div class="card-body">
+<div class="fieldRow2">
+<div>
+<label for="splitFeeA">Total Team Fee</label>
+<input id="splitFeeA" min="0" placeholder="e.g., 120" step="0.01" type="number"/>
+</div>
+<div>
+<label for="splitCaptainA">Captain / Payer</label>
+<input id="splitCaptainA" placeholder="e.g., Hilal" type="text"/>
+</div>
+</div>
+<div class="splitKpis" id="splitKpisA"></div>
+<div aria-label="Team A payments list" class="splitTable">
+<div class="splitHead">
+<div>Player</div>
+<div>Paid</div>
+<div></div>
+</div>
+<div id="splitRowsA"></div>
+</div>
+<div class="splitSummary" id="splitSummaryA"></div>
+</div>
+</section>
+<section class="card splitTeamCard" data-team="B">
+<div class="card-header">
+<div class="splitTop">
+<div class="teamTitle">
+<span aria-hidden="true" class="teamDot b"></span>
+<div>
+<h2><span aria-hidden="true" class="teamDot b"></span> <span id="splitTeamBLabel">Team B</span> Split</h2>
+<p>Enter fee + payments for Team B.</p>
+</div>
+</div>
+<div class="rowBtns no-print">
+<button class="btn" id="splitImportB" title="Import roster names into split list">↩️ Import roster</button>
+<button class="btn" id="splitAddB">➕ Add player</button>
+</div>
+</div>
+</div>
+<div class="card-body">
+<div class="fieldRow2">
+<div>
+<label for="splitFeeB">Total Team Fee</label>
+<input id="splitFeeB" min="0" placeholder="e.g., 120" step="0.01" type="number"/>
+</div>
+<div>
+<label for="splitCaptainB">Captain / Payer</label>
+<input id="splitCaptainB" placeholder="e.g., Alex" type="text"/>
+</div>
+</div>
+<div class="splitKpis" id="splitKpisB"></div>
+<div aria-label="Team B payments list" class="splitTable">
+<div class="splitHead">
+<div>Player</div>
+<div>Paid</div>
+<div></div>
+</div>
+<div id="splitRowsB"></div>
+</div>
+<div class="splitSummary" id="splitSummaryB"></div>
+</div>
+</section>
+</div>
+<section class="card" style="margin-top:16px;">
+<div class="card-header">
+<div>
+<h2>📌 Combined Notes</h2>
+<p>Useful when both teams share one booking or when you want one clean payout list.</p>
+</div>
+</div>
+<div class="card-body">
+<div class="hint" id="splitCombined"></div>
 
+<details>
+  <summary>Positions & roles <span class="summaryHint">S / OH / MB / OPP / L</span></summary>
+  <div class="ruleBody">
+    <ul class="events" style="margin:0;">
+      <li><b>Setter (S)</b>: runs the offense, usually touches the 2nd ball. Often sets from Right Front/Back.</li>
+      <li><b>Outside (OH)</b>: primary passer + attacker on the left. Usually 2 outsides (OH1/OH2).</li>
+      <li><b>Middle (MB)</b>: quick attacks + main blocker. Usually 2 middles (MB1/MB2).</li>
+      <li><b>Opposite (OPP)</b>: right-side attacker, blocks the other team’s outside.</li>
+      <li><b>Libero / DS (L/DS)</b>: back-row defender/passer. Libero cannot block/attack above the net.</li>
+    </ul>
+    <div class="hint" style="margin-top:10px;">Tip: In this app, you can label players with role codes (S, OH1, MB1, etc.) so rotations are easier to read.</div>
+  </div>
+</details>
+
+<details>
+  <summary>Common faults (quick list) <span class="summaryHint">what refs call</span></summary>
+  <div class="ruleBody">
+    <ul class="events" style="margin:0;">
+      <li><b>Net touch</b> during the action.</li>
+      <li><b>Center line</b> fault (foot completely crosses under the net and interferes).</li>
+      <li><b>Lift / carry</b> (prolonged contact), <b>double</b> (not clean) — more strict on sets.</li>
+      <li><b>Rotation / overlap</b> (wrong order at serve contact).</li>
+      <li><b>Back-row attack</b> (if a back-row player attacks above the net in front of the 3m line).</li>
+      <li><b>Illegal block</b> by libero / back-row.</li>
+    </ul>
+  </div>
+</details>
+
+<details open>
+  <summary>How to use this app (recommended flow) <span class="summaryHint">fast setup</span></summary>
+  <div class="ruleBody">
+    <ol class="events" style="margin:0;">
+      <li><b>Brand your teams</b> on Home: rename Team A/B and pick colors so every page is easy to read.</li>
+      <li><b>Enter rosters</b> (subs included). Use consistent jersey numbers + role codes if you have them.</li>
+      <li><b>Lineup Builder</b>: set your Starting 6 and confirm the on-court order before the match.</li>
+      <li><b>Simulation</b>: run rally scoring + verify rotations when side-outs happen.</li>
+      <li><b>Coach Sheet</b>: print/view a clean summary for the bench.</li>
+      <li><b>Calendar</b>: add a weekly league night (recurring) and then edit individual games if times change.</li>
+      <li><b>Split Calculator</b>: after the match, paste “who paid” and generate who owes the captain.</li>
+    </ol>
+  </div>
+</details>
+
+<details>
+  <summary>Calendar tips <span class="summaryHint">recurring + edits</span></summary>
+  <div class="ruleBody">
+    <ul class="events" style="margin:0;">
+      <li>Use <b>Recurring</b> to generate your weekly games (e.g., every Wednesday).</li>
+      <li>Tap any game pill to <b>edit just that game</b> (postponed, time change, different location).</li>
+      <li>Export to <span class="kbd">.ics</span> and import into Google/Apple Calendar.</li>
+    </ul>
+  </div>
+</details>
+
+<details>
+  <summary>Lineup sanity checklist <span class="summaryHint">avoid overlap calls</span></summary>
+  <div class="ruleBody">
+    <ul class="events" style="margin:0;">
+      <li>Before the whistle: verify the <b>rotation order</b> is correct (1–6).</li>
+      <li>On serve: make sure players aren’t <b>overlapping</b> their adjacent teammates (front/back + left/right).</li>
+      <li>If you use a libero: decide who they replace (often MBs) and be consistent.</li>
+    </ul>
+  </div>
+</details>
+</div>
+</section>
+</section><!-- CALENDAR VIEW -->
+<section aria-labelledby="tabCalendar" class="view hidden" data-active-team="Both" id="viewCalendar" role="tabpanel">
+<section class="card" style="margin-bottom:16px;">
+<div class="card-header">
+<div>
+<h2 style="margin:0;">Calendar (Games)</h2>
+<div class="hint" style="margin-top:8px;"><span class="teamBadge both" id="calTeamBadge"></span></div>
+<div class="hint" style="margin-top:6px;">
+              View your schedule, add single or recurring games, and import/export <span class="kbd">.ics</span> files.
+              Tap any game pill on the calendar to edit it (even if it was generated from a recurring series).
+            </div>
+</div>
+<div class="row" style="gap:10px; align-items:center;">
+<label class="btn ghost" style="gap:8px; cursor:pointer;">
+<svg aria-hidden="true" class="icon" viewbox="0 0 24 24"><path d="M12 3l4 4h-3v7h-2V7H8l4-4zm-7 14h14v2H5v-2z" fill="currentColor"></path></svg>
+              Import ICS
+              <input accept=".ics,text/calendar" id="calIcsFile" style="display:none;" type="file"/>
+</label>
+<button class="btn" id="calExportIcs" title="Export games as an .ics file">
+<svg aria-hidden="true" class="icon" viewbox="0 0 24 24"><path d="M12 21l-4-4h3V10h2v7h3l-4 4zM5 5h14v2H5V5z" fill="currentColor"></path></svg>
+              Export ICS
+            </button>
+<button class="btn ghost" id="calCopySummary" title="Copy a text summary">
+<svg aria-hidden="true" class="icon" viewbox="0 0 24 24"><path d="M16 1H4a2 2 0 0 0-2 2v12h2V3h12V1zm4 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h12v14z" fill="currentColor"></path></svg>
+              Copy
+            </button>
+</div>
+</div>
+<!-- Calendar first -->
+<div class="card" style="background:var(--panel2); border:1px solid var(--border); padding:14px; border-radius: var(--radius); box-shadow:none;">
+<div class="row" style="justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+<div class="row calMonthRow" style="gap:10px; align-items:center; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch;">
+<button class="btn ghost" id="calPrevMonth" title="Previous month">&lt;&lt;</button>
+<div class="label" id="calMonthLabel" style="margin:0; font-size:16px;"></div>
+<button class="btn ghost" id="calNextMonth" title="Next month">&gt;&gt;</button>
+<button class="btn" id="calToday" title="Jump to current month">Today</button>
+</div>
+<div class="row" style="gap:10px; align-items:center; flex-wrap:wrap;">
+<div class="pill" style="border-color: var(--teamA); color: var(--teamA);">● <span id="calLegendA">Team A</span></div>
+<div class="pill" style="border-color: var(--teamB); color: var(--teamB);">● <span id="calLegendB">Team B</span></div>
+<div class="pill">● League (Both)</div>
+</div>
+</div>
+<div id="calSelectedPane" style="display:none; margin-top:12px;">
+<div style="width:100%; min-width:280px;">
+<div class="label" style="margin-bottom:6px;">Selected day</div>
+<div class="card" style="background:var(--panel); border:1px solid var(--border); padding:12px; border-radius: var(--radius2); box-shadow:none;">
+<div class="row" style="justify-content:space-between; gap:10px; align-items:center;">
+<div>
+<div class="label" id="calSelectedLabel" style="margin:0;"></div>
+<div class="hint" id="calSelectedHint" style="margin-top:4px;"></div>
+</div>
+<button class="btn" id="calAddOnSelected">+ Add game</button>
+</div>
+<div class="stack" id="calDayList" style="gap:10px; margin-top:10px;"></div>
+</div>
+</div>
+</div>
+<div class="calGrid" id="calGrid" style="margin-top:12px;"></div>
+<div style="margin-top:12px;">
+<div style="width:100%; min-width:300px;">
+<div class="row" style="justify-content:space-between; align-items:center; gap:10px;">
+<div>
+<div class="label" style="margin:0;">Add / Edit</div>
+<div class="hint">Toggle between single game or recurring weekly series.</div>
+</div>
+<div class="pill" id="calEditPill" style="display:none;">Editing</div>
+</div>
+</div>
+<div aria-label="Calendar add mode" class="segmented" role="tablist" style="margin-top:10px;">
+<button aria-selected="true" id="calModeSingle" type="button">Single</button>
+<button aria-selected="false" id="calModeRecurring" type="button">Recurring</button>
+</div>
+<input id="calEditId" type="hidden" value=""/>
+<input id="calSelectedDate" type="hidden" value=""/>
+<!-- Single form -->
+<div class="card" id="calFormSingle" style="margin-top:12px; background:var(--panel); border:1px solid var(--border); padding:12px; border-radius: var(--radius); box-shadow:none;">
+<div class="grid" style="grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px;">
+<div>
+<div class="label">Team</div>
+<select id="calTeam">
+<option value="Both">League (Both)</option>
+<option id="calTeamAOption" value="A">Team A</option>
+<option id="calTeamBOption" value="B">Team B</option>
+</select>
+</div>
+<div>
+<div class="label">Date</div>
+<input id="calDate" type="date"/>
+</div>
+<div>
+<div class="label">Start</div>
+<input id="calStart" type="time"/>
+</div>
+<div>
+<div class="label">End (optional)</div>
+<input id="calEnd" type="time"/>
+</div>
+<div style="grid-column: 1 / -1;">
+<div class="label">Opponent / Event</div>
+<input id="calOpponent" placeholder="e.g., vs Raptors, Practice, Playoffs" type="text"/>
+</div>
+<div style="grid-column: 1 / -1;">
+<div class="label">Location</div>
+<input id="calLocation" placeholder="e.g., CIF Gym A, 123 Main St" type="text"/>
+</div>
+<div style="grid-column: 1 / -1;">
+<div class="label">Notes (optional)</div>
+<textarea id="calNotes" placeholder="Bring jerseys, arrive 6:45pm, etc." rows="3"></textarea>
+</div>
+</div>
+<div class="row" style="gap:10px; margin-top:12px; flex-wrap:wrap;">
+<button class="btn" id="calSaveGame">
+<svg aria-hidden="true" class="icon" viewbox="0 0 24 24"><path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7l-4-4zm2 16H5V5h11.17L19 7.83V19zM7 7h8v2H7V7zm0 4h10v8H7v-8z" fill="currentColor"></path></svg>
+                    Save
+                  </button>
+<button class="btn ghost" id="calClearForm">
+<svg aria-hidden="true" class="icon" viewbox="0 0 24 24"><path d="M6 19h12v2H6v-2zM7 4h10l1 2H6l1-2zm1 4h8l-1 12H9L8 8z" fill="currentColor"></path></svg>
+                    Clear
+                  </button>
+<button class="btn danger" id="calDeleteEditing" style="display:none;">Delete</button>
+<div class="hint" id="calStatus" style="margin-left:auto;"></div>
+</div>
+</div>
+<!-- Recurring form -->
+<div class="card hidden" id="calFormRecurring" style="margin-top:12px; background:var(--panel); border:1px solid var(--border); padding:12px; border-radius: var(--radius); box-shadow:none;">
+<div class="hint" style="margin-bottom:10px;">
+                  Create a weekly series (e.g., every Tuesday). Each game is still editable individually afterward.
+                </div>
+<div class="grid" style="grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px;">
+<div>
+<div class="label">Weekday</div>
+<select id="calWeekday">
+<option value="MO">Monday</option>
+<option selected="" value="TU">Tuesday</option>
+<option value="WE">Wednesday</option>
+<option value="TH">Thursday</option>
+<option value="FR">Friday</option>
+<option value="SA">Saturday</option>
+<option value="SU">Sunday</option>
+</select>
+</div>
+<div>
+<div class="label">Start date (first week)</div>
+<input id="calSeriesStartDate" type="date"/>
+</div>
+<div>
+<div class="label">Start time</div>
+<input id="calSeriesStartTime" type="time"/>
+</div>
+<div>
+<div class="label">End time</div>
+<input id="calSeriesEndTime" type="time"/>
+</div>
+<div>
+<div class="label">Weeks</div>
+<input id="calSeriesWeeks" max="52" min="1" type="number" value="10"/>
+</div>
+<div>
+<div class="label">Applies to</div>
+<select id="calSeriesTeam">
+<option selected="" value="Both">League (Both)</option>
+<option id="calSeriesTeamAOption" value="A">Team A</option>
+<option id="calSeriesTeamBOption" value="B">Team B</option>
+</select>
+</div>
+<div style="grid-column: 1 / -1;">
+<div class="label">Opponent / Event (optional)</div>
+<input id="calSeriesOpponent" placeholder="e.g., League Night, Week {n} vs TBD" type="text"/>
+<div class="hint">Use <span class="kbd">{n}</span> to insert week number (1..N).</div>
+</div>
+<div style="grid-column: 1 / -1;">
+<div class="label">Location (optional)</div>
+<input id="calSeriesLocation" placeholder="e.g., CIF Gym A" type="text"/>
+</div>
+</div>
+<div class="row" style="gap:10px; margin-top:10px; flex-wrap:wrap;">
+<button class="btn" id="calAddWeeklySeries">
+                    Add weekly series
+                  </button>
+<button class="btn ghost" id="calPrefillNextWeek" title="Prefill the single-game form for next week's game">
+                    Prefill next week
+                  </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+
+</main>
+</div>
 <script>
 /* =====================================================
    Core constants
@@ -2101,6 +2796,13 @@ let state = {
   ui: {
     showZones: true,
     showRoles: true,
+    lineupTeam: "A",
+  },
+  branding: {
+    teamAName: "Team A",
+    teamBName: "Team B",
+    teamAColor: "#ea580c",
+    teamBColor: "#dc2626"
   },
   settings: {
     targetPoints: 15,
@@ -2119,7 +2821,16 @@ let state = {
     B: { roster: [], lineup: {1:null,2:null,3:null,4:null,5:null,6:null}, rot: 0, history: [] },
   },
   coach: {
-    team: "A",
+     team: "A",
+   },
+  leagueSplit: {
+    currency: "CAD",
+    A: { fee: 0, captain: "", players: [] },
+    B: { fee: 0, captain: "", players: [] },
+  },
+  calendar: {
+    timezone: "America/Toronto",
+    games: []
   }
 };
 
@@ -2170,6 +2881,170 @@ function clampInt(v, min, max, fallback){
   return Math.max(min, Math.min(max, Math.round(n)));
 }
 function otherTeam(team){ return team === "A" ? "B" : "A"; }
+
+function teamName(team){
+  return team === "A" ? (state.branding.teamAName || "Team A") : (state.branding.teamBName || "Team B");
+}
+function teamColor(team){
+  return team === "A" ? (state.branding.teamAColor || "#ea580c") : (state.branding.teamBColor || "#dc2626");
+}
+function hexToRgb(hex){
+  const h = String(hex || "").trim().replace("#","");
+  if (h.length !== 6) return {r:255,g:255,b:255};
+  const n = parseInt(h,16);
+  return { r:(n>>16)&255, g:(n>>8)&255, b:n&255 };
+}
+function applyTeamBrandingToUI(){
+  // CSS vars
+  const a = hexToRgb(teamColor("A"));
+  const b = hexToRgb(teamColor("B"));
+  document.documentElement.style.setProperty("--teamA", teamColor("A"));
+  document.documentElement.style.setProperty("--teamB", teamColor("B"));
+  document.documentElement.style.setProperty("--teamA_fade", `rgba(${a.r},${a.g},${a.b},.46)`);
+  document.documentElement.style.setProperty("--teamB_fade", `rgba(${b.r},${b.g},${b.b},.46)`);
+  document.documentElement.style.setProperty("--teamA_strong", `rgba(${a.r},${a.g},${a.b},.64)`);
+  document.documentElement.style.setProperty("--teamB_strong", `rgba(${b.r},${b.g},${b.b},.64)`);
+  document.documentElement.style.setProperty("--teamA_border", `rgba(${a.r},${a.g},${a.b},.85)`);
+  document.documentElement.style.setProperty("--teamB_border", `rgba(${b.r},${b.g},${b.b},.85)`);
+  document.documentElement.style.setProperty("--teamA_grad", `linear-gradient(135deg, rgba(${a.r},${a.g},${a.b},.60), rgba(${a.r},${a.g},${a.b},.16))`);
+  document.documentElement.style.setProperty("--teamB_grad", `linear-gradient(135deg, rgba(${b.r},${b.g},${b.b},.60), rgba(${b.r},${b.g},${b.b},.16))`);
+
+  const aName = teamName("A");
+  const bName = teamName("B");
+
+  const setTxt = (id, txt) => { const el=document.getElementById(id); if(el) el.textContent = txt; };
+  setTxt("teamANameLabel", aName);
+  setTxt("teamBNameLabel", bName);
+  setTxt("simTeamALabel", aName);
+  setTxt("simTeamBLabel", bName);
+  setTxt("coachTeamALabel", aName);
+  setTxt("coachTeamBLabel", bName);
+  setTxt("splitTeamALabel", aName);
+  setTxt("splitTeamBLabel", bName);
+
+  const hA = document.getElementById("teamAHeader");
+  if (hA) hA.textContent = `${aName} (Home)`;
+  const hB = document.getElementById("teamBHeader");
+  if (hB) hB.textContent = `${bName} (Away)`;
+
+  const setOpt = (id, txt) => { const el=document.getElementById(id); if(el) el.textContent = txt; };
+  setOpt("splitTeamAOption", aName);
+  setOpt("splitTeamBOption", bName);
+  setOpt("calTeamAOption", aName);
+  setOpt("calTeamBOption", bName);
+  setOpt("calSeriesTeamAOption", aName);
+  setOpt("calSeriesTeamBOption", bName);
+
+  // Lineup Builder labels + "currently editing" cue
+  const btnA = document.getElementById("myTeamA");
+  const btnB = document.getElementById("myTeamB");
+  const lblA = document.getElementById("myTeamALabel");
+  const lblB = document.getElementById("myTeamBLabel");
+  if (lblA) lblA.textContent = aName;
+  if (lblB) lblB.textContent = bName;
+  if (btnA) btnA.setAttribute("title", `Edit ${aName}`);
+  if (btnB) btnB.setAttribute("title", `Edit ${bName}`);
+
+  const myTeamPill = document.getElementById("myTeamLabel");
+  if (myTeamPill){
+    const cur = state.ui?.lineupTeam || "A";
+    myTeamPill.textContent = (cur === "A" ? aName : bName);
+  }
+  const editHint = document.getElementById("lineupEditingHint");
+  if (editHint){
+    const cur = state.ui?.lineupTeam || "A";
+    const nm = cur === "A" ? aName : bName;
+    editHint.style.background = cur === "A" ? "var(--teamA_fade)" : "var(--teamB_fade)";
+    editHint.textContent = `Editing: ${nm}`;
+  }
+
+  // Update any generic labels used across pages
+  document.querySelectorAll('[data-team-name="A"]').forEach(el=>{ el.textContent = aName; });
+  document.querySelectorAll('[data-team-name="B"]').forEach(el=>{ el.textContent = bName; });
+
+
+  updateTeamBadges();
+}
+function updateTeamBadges(){
+  const aName = teamName("A");
+  const bName = teamName("B");
+  const aCol = teamColor("A");
+  const bCol = teamColor("B");
+
+  const mk = (team, label)=>{
+    if(team==="A") return `<span class="dot" style="background:${aCol}"></span>${label||aName}`;
+    if(team==="B") return `<span class="dot" style="background:${bCol}"></span>${label||bName}`;
+    return `<span class="dot" style="background:rgba(255,255,255,.35)"></span>${label||"Both Teams"}`;
+  };
+
+  // Lineup: uses state.ui.lineupTeam
+  const lu = document.getElementById("lineupTeamBadge");
+  if(lu){
+    const t = state.ui.lineupTeam || "A";
+    lu.className = "teamBadge " + (t==="A"?"a":"b");
+    lu.innerHTML = `Editing: ${mk(t)}`;
+  }
+
+  // Coach: selected coachPick button
+  const coach = document.getElementById("coachTeamBadge");
+  if(coach){
+    const aBtn = document.getElementById("coachTeamA");
+    const bBtn = document.getElementById("coachTeamB");
+    const t = (bBtn && bBtn.getAttribute("aria-selected")==="true") ? "B" : "A";
+    coach.className = "teamBadge " + (t==="A"?"a":"b");
+    coach.innerHTML = `Viewing: ${mk(t)}`;
+  }
+
+  // Split: selected split pick
+  const split = document.getElementById("splitTeamBadge");
+  if(split){
+    const aBtn = document.getElementById("splitTeamA");
+    const bBtn = document.getElementById("splitTeamB");
+    const t = (bBtn && bBtn.getAttribute("aria-selected")==="true") ? "B" : "A";
+    split.className = "teamBadge " + (t==="A"?"a":"b");
+    split.innerHTML = `Splitting: ${mk(t)}`;
+  }
+
+  // Calendar: filter pills
+  const cal = document.getElementById("calTeamBadge");
+  if(cal){
+    const aBtn = document.getElementById("calTeamA");
+    const bBtn = document.getElementById("calTeamB");
+    const t = (aBtn && aBtn.getAttribute("aria-selected")==="true") ? "A" :
+              (bBtn && bBtn.getAttribute("aria-selected")==="true") ? "B" : "Both";
+    cal.className = "teamBadge " + (t==="A"?"a":t==="B"?"b":"both");
+    if(t==="Both"){
+      cal.innerHTML = `Filter: ${mk("Both","All teams (A + B)")}`;
+    }else{
+      cal.innerHTML = `Filter: ${mk(t)}`;
+    }
+  }
+
+  // Simulation: always show both
+  const sim = document.getElementById("simTeamsBadge");
+  if(sim){
+    sim.className = "teamBadge both";
+    sim.innerHTML = `${mk("A")} <span style="opacity:.7;">vs</span> ${mk("B")}`;
+  }
+}
+
+const BRAND_KEY = "vb_team_branding_v1";
+function loadBranding(){
+  try{
+    const raw = localStorage.getItem(BRAND_KEY);
+    if (!raw) return;
+    const obj = JSON.parse(raw);
+    if (obj && typeof obj === "object"){
+      if (obj.teamAName) state.branding.teamAName = String(obj.teamAName);
+      if (obj.teamBName) state.branding.teamBName = String(obj.teamBName);
+      if (obj.teamAColor) state.branding.teamAColor = String(obj.teamAColor);
+      if (obj.teamBColor) state.branding.teamBColor = String(obj.teamBColor);
+    }
+  } catch(e){}
+}
+function saveBranding(){
+  localStorage.setItem(BRAND_KEY, JSON.stringify(state.branding));
+}
 
 function applyRotation(slotZone, rotCount){
   let z = slotZone;
@@ -2351,6 +3226,7 @@ function renderLineups(){
 
   updateCourt();
   updateSimWarnings();
+  renderSplit();
   renderMyLineup();
 }
 
@@ -2369,8 +3245,8 @@ function updateSimWarnings(){
   const a = validateLineup("A");
   const b = validateLineup("B");
   const msgs = [];
-  if (a.length) msgs.push("Team A: " + a.join(" "));
-  if (b.length) msgs.push("Team B: " + b.join(" "));
+  if (a.length) msgs.push(teamName("A") + ": " + a.join(" "));
+  if (b.length) msgs.push(teamName("B") + ": " + b.join(" "));
   const msg = msgs.length ? ("Fix lineups before sim:\n" + msgs.join("\n")) : "";
   const el = document.getElementById("simWarn");
   if (el) showWarn("simWarn", msg);
@@ -2379,18 +3255,23 @@ function updateSimWarnings(){
 /* =====================================================
    Lineup Builder tab (My Team)
 ===================================================== */
-function getMyTeam(){ return state.ui.myTeam || "A"; }
+function getMyTeam(){ return state.ui.lineupTeam || state.ui.myTeam || "A"; }
 
 function setMyTeam(team){
   state.ui.myTeam = (team === "B") ? "B" : "A";
+  state.ui.lineupTeam = state.ui.myTeam;
   const aBtn = document.getElementById("myTeamA");
   const bBtn = document.getElementById("myTeamB");
   if (aBtn && bBtn){
     aBtn.setAttribute("aria-selected", state.ui.myTeam === "A" ? "true" : "false");
     bBtn.setAttribute("aria-selected", state.ui.myTeam === "B" ? "true" : "false");
   }
+  const v = document.getElementById("viewLineup");
+  if (v) v.setAttribute("data-active-team", state.ui.myTeam);
   const lbl = document.getElementById("myTeamLabel");
-  if (lbl) lbl.textContent = state.ui.myTeam;
+  if (lbl) lbl.textContent = teamName(state.ui.myTeam);
+  applyTeamBrandingToUI();
+  updateTeamBadges();
   renderMyLineup();
   renderMyInsights();
   renderMyCourtPreview();
@@ -2553,6 +3434,8 @@ function renderMyCourtPreview(){
   if (!court) return;
 
   const team = getMyTeam();
+  const teamLbl = document.getElementById("myTeamLabel");
+  if (teamLbl) teamLbl.textContent = teamName(team);
   court.classList.toggle("myA", team === "A");
   court.classList.toggle("myB", team === "B");
 
@@ -2800,6 +3683,7 @@ function clearLineup(team){
   renderCoach();
   if (document.getElementById("myCourtPreview") && team === getMyTeam()){
     updateMyWarnings();
+    renderMyLineup();
     renderMyCourtPreview();
     renderMyInsights();
   }
@@ -2859,6 +3743,7 @@ function rotateTeam(team){
   renderCoach();
   if (document.getElementById("myCourtPreview") && team === getMyTeam()){
     updateMyWarnings();
+    renderMyLineup();
     renderMyCourtPreview();
     renderMyInsights();
   }
@@ -2871,6 +3756,7 @@ function undoRotateTeam(team){
   renderCoach();
   if (document.getElementById("myCourtPreview") && team === getMyTeam()){
     updateMyWarnings();
+    renderMyLineup();
     renderMyCourtPreview();
     renderMyInsights();
   }
@@ -2883,6 +3769,7 @@ function resetRotateTeam(team){
   renderCoach();
   if (document.getElementById("myCourtPreview") && team === getMyTeam()){
     updateMyWarnings();
+    renderMyLineup();
     renderMyCourtPreview();
     renderMyInsights();
   }
@@ -3049,6 +3936,7 @@ function exportJson(){
     theme: document.documentElement.getAttribute("data-theme") || "dark",
     ui: state.ui,
     settings: state.settings,
+    leagueSplit: state.leagueSplit,
     game: {
       scoreA: state.game.scoreA,
       scoreB: state.game.scoreB,
@@ -3108,7 +3996,28 @@ function importJson(raw){
     ? { targetPoints: clampInt(obj.settings.targetPoints, 1, 99, 15), speed: Number(obj.settings.speed) || 1 }
     : state.settings;
 
-  state.teams.A = normalizeTeam(obj.teams.A);
+  
+  // league split (optional)
+  const normalizeSplit = (srcTeam)=>{
+    const fee = Number(srcTeam?.fee) || 0;
+    const captain = String(srcTeam?.captain ?? "");
+    const players = Array.isArray(srcTeam?.players) ? srcTeam.players : [];
+    const playersNorm = players.map(p=>({
+      id: (p.id && typeof p.id === "string") ? p.id : uid(),
+      name: String(p.name ?? "").trim(),
+      paid: Number(p.paid) || 0,
+    }));
+    return { fee, captain, players: playersNorm };
+  };
+  if (obj.leagueSplit && typeof obj.leagueSplit === "object"){
+    state.leagueSplit.currency = (obj.leagueSplit.currency === "USD" ? "USD" : "CAD");
+    state.leagueSplit.A = normalizeSplit(obj.leagueSplit.A);
+    state.leagueSplit.B = normalizeSplit(obj.leagueSplit.B);
+  } else {
+    // keep existing
+  }
+
+state.teams.A = normalizeTeam(obj.teams.A);
   state.teams.B = normalizeTeam(obj.teams.B);
 
   state.game.scoreA = clampInt(obj.game?.scoreA, 0, 999, 0);
@@ -3126,6 +4035,15 @@ function importJson(raw){
   document.getElementById("toggleRoles").checked = state.ui.showRoles;
   document.getElementById("targetPoints").value = state.settings.targetPoints;
   document.getElementById("speed").value = String(state.settings.speed);
+  // reflect league split into UI controls
+  if (document.getElementById("splitFeeA")){
+    document.getElementById("splitFeeA").value = (state.leagueSplit.A.fee || 0) ? String(state.leagueSplit.A.fee) : "";
+    document.getElementById("splitCaptainA").value = state.leagueSplit.A.captain || "";
+    document.getElementById("splitFeeB").value = (state.leagueSplit.B.fee || 0) ? String(state.leagueSplit.B.fee) : "";
+    document.getElementById("splitCaptainB").value = state.leagueSplit.B.captain || "";
+    renderSplit();
+  }
+
 
   renderRosters();
   renderLineups();
@@ -3219,6 +4137,712 @@ function renderCoach(){
   }).join("");
 }
 
+
+/* =====================================================
+   Calendar (ICS) – Games schedule
+===================================================== */
+const CAL_KEY = "vb_calendar_v1";
+
+function calPersist(){
+  try{ localStorage.setItem(CAL_KEY, JSON.stringify(state.calendar)); }catch(e){}
+}
+function calLoad(){
+  try{
+    const raw = localStorage.getItem(CAL_KEY);
+    if (!raw) return;
+    const obj = JSON.parse(raw);
+    if (obj && Array.isArray(obj.games)){
+      state.calendar = {
+        timezone: obj.timezone || "America/Toronto",
+        games: obj.games.filter(g=>g && g.id && g.dtStart && g.summary)
+      };
+    }
+  }catch(e){}
+}
+function calNewId(){ return "g_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16); }
+
+function pad2(n){ return String(n).padStart(2,"0"); }
+function icsEscape(s){
+  return String(s ?? "")
+    .replace(/\\/g, "\\\\")
+    .replace(/\n/g, "\\n")
+    .replace(/,/g, "\\,")
+    .replace(/;/g, "\\;");
+}
+function icsUnescape(s){
+  return String(s ?? "")
+    .replace(/\\n/g, "\n")
+    .replace(/\\,/g, ",")
+    .replace(/\\;/g, ";")
+    .replace(/\\\\/g, "\\");
+}
+function toICSDateUTC(date){
+  // YYYYMMDDTHHMMSSZ
+  const y = date.getUTCFullYear();
+  const m = pad2(date.getUTCMonth()+1);
+  const d = pad2(date.getUTCDate());
+  const hh = pad2(date.getUTCHours());
+  const mm = pad2(date.getUTCMinutes());
+  const ss = pad2(date.getUTCSeconds());
+  return `${y}${m}${d}T${hh}${mm}${ss}Z`;
+}
+function parseICSDate(val){
+  // Supports:
+  // - 20260225T190000Z (UTC)
+  // - 20260225T190000 (floating/local)
+  // - 20260225 (all day)
+  const v = String(val||"").trim();
+  if (!v) return null;
+  const isUTC = v.endsWith("Z");
+  const core = isUTC ? v.slice(0,-1) : v;
+
+  const m = core.match(/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})?)?$/);
+  if (!m) return null;
+  const Y=+m[1], Mo=+m[2]-1, D=+m[3];
+  const HH=+(m[4]||"0"), MM=+(m[5]||"0"), SS=+(m[6]||"0");
+  if (isUTC) return new Date(Date.UTC(Y,Mo,D,HH,MM,SS));
+  // floating time => interpret as local browser time
+  return new Date(Y,Mo,D,HH,MM,SS);
+}
+
+function normalizeGame(g){
+  const dtStart = (g.dtStart instanceof Date) ? g.dtStart : new Date(g.dtStart);
+  const dtEnd = g.dtEnd ? ((g.dtEnd instanceof Date) ? g.dtEnd : new Date(g.dtEnd)) : null;
+  return {
+    id: g.id || calNewId(),
+    team: g.team || "Both",
+    summary: String(g.summary || "").trim() || "Game",
+    location: String(g.location || "").trim(),
+    notes: String(g.notes || "").trim(),
+    dtStart: dtStart.toISOString(),
+    dtEnd: dtEnd ? dtEnd.toISOString() : "",
+  };
+}
+
+function sortGames(){
+  state.calendar.games.sort((a,b)=> new Date(a.dtStart) - new Date(b.dtStart));
+}
+
+
+function calEnsureUI(){
+  state.calendar.ui = state.calendar.ui || {};
+  if (!state.calendar.ui.month){
+    const now = new Date();
+    state.calendar.ui.month = now.getMonth(); // 0-11
+    state.calendar.ui.year = now.getFullYear();
+  }
+  if (!state.calendar.ui.selectedDate) state.calendar.ui.selectedDate = "";
+}
+
+function calSetMonth(year, month){
+  state.calendar.ui.year = year;
+  state.calendar.ui.month = month;
+  calPersist();
+  renderCalendar();
+}
+
+function calSelectDate(dateStr){
+  state.calendar.ui.selectedDate = dateStr;
+  calPersist();
+  renderCalendar();
+}
+
+function calGamesOnDate(dateStr){
+  return state.calendar.games.filter(g=>{
+    const d = new Date(g.dtStart);
+    const key = `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+    return key === dateStr;
+  });
+}
+
+function renderCalendar(){
+  if (!state.calendar) state.calendar = { timezone: "America/Toronto", games: [] };
+  sortGames();
+  calEnsureUI();
+
+  // Branding labels
+  const la = document.getElementById("calLegendA");
+  const lb = document.getElementById("calLegendB");
+  if (la) la.textContent = teamName("A");
+  if (lb) lb.textContent = teamName("B");
+
+  // Update select option labels
+  const optA = document.getElementById("calTeamAOption");
+  const optB = document.getElementById("calTeamBOption");
+  const optAS = document.getElementById("calSeriesTeamAOption");
+  const optBS = document.getElementById("calSeriesTeamBOption");
+  if (optA) optA.textContent = teamName("A");
+  if (optB) optB.textContent = teamName("B");
+  if (optAS) optAS.textContent = teamName("A");
+  if (optBS) optBS.textContent = teamName("B");
+
+  // Month label
+  const monthLabel = document.getElementById("calMonthLabel");
+  const firstOfMonth = new Date(state.calendar.ui.year, state.calendar.ui.month, 1);
+  if (monthLabel){
+    monthLabel.textContent = firstOfMonth.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+  }
+
+  // Build calendar grid
+  const grid = document.getElementById("calGrid");
+  if (grid){
+    const dows = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    const dowRow = dows.map(d=>`<div class="calDow">${d}</div>`).join("");
+    const startDow = firstOfMonth.getDay(); // 0=Sun
+    const daysInMonth = new Date(state.calendar.ui.year, state.calendar.ui.month+1, 0).getDate();
+    const prevMonthDays = new Date(state.calendar.ui.year, state.calendar.ui.month, 0).getDate();
+
+    // 6 weeks grid (42 cells) for stable layout
+    const cells = [];
+    for (let i=0; i<42; i++){
+      const dayIndex = i - startDow + 1; // 1..daysInMonth, or outside
+      let y = state.calendar.ui.year;
+      let m = state.calendar.ui.month;
+      let dayNum = dayIndex;
+      let muted = false;
+
+      if (dayIndex < 1){
+        muted = true;
+        m = state.calendar.ui.month - 1;
+        if (m < 0){ m = 11; y--; }
+        dayNum = prevMonthDays + dayIndex;
+      } else if (dayIndex > daysInMonth){
+        muted = true;
+        m = state.calendar.ui.month + 1;
+        if (m > 11){ m = 0; y++; }
+        dayNum = dayIndex - daysInMonth;
+      }
+
+      const dateStr = `${y}-${pad2(m+1)}-${pad2(dayNum)}`;
+      const dayGames = calGamesOnDate(dateStr);
+
+      // A tiny dot if there's anything
+      let dot = "";
+      if (dayGames.some(g=>g.team==="A")) dot += `<span class="dot" style="background: var(--teamA); opacity:.85;"></span>`;
+      if (dayGames.some(g=>g.team==="B")) dot += `<span class="dot" style="background: var(--teamB); opacity:.85;"></span>`;
+      if (dayGames.some(g=>g.team==="Both")) dot += `<span class="dot" style="background: var(--muted); opacity:.7;"></span>`;
+      if (!dot) dot = `<span class="dot"></span>`;
+
+      const pills = dayGames.slice(0,3).map(g=>{
+        const cls = g.team==="A" ? "teamA" : g.team==="B" ? "teamB" : "both";
+        const st = new Date(g.dtStart);
+        const t = st.toLocaleTimeString(undefined, {hour:"numeric", minute:"2-digit"});
+        const label = `${t} • ${g.summary}`;
+        return `<button class="calPill ${cls}" type="button" data-cal-edit="${escapeHtml(g.id)}" title="Edit">${escapeHtml(label)}</button>`;
+      }).join("");
+
+      const more = (dayGames.length > 3) ? `<div class="hint" style="margin-top:6px;">+${dayGames.length-3} more</div>` : "";
+
+      const selectedCls = (state.calendar.ui.selectedDate === dateStr) ? " selected" : "";
+      cells.push(`
+        <div class="calDay ${muted ? "muted":""}${selectedCls}" data-cal-date="${escapeHtml(dateStr)}">
+          <div class="calNum">${dot}<span>${dayNum}</span></div>
+          <div class="calPills">${pills}${more}</div>
+        </div>
+      `);
+    }
+
+    grid.innerHTML = dowRow + cells.join("");
+
+    // Click day selects date (but let pill clicks edit)
+    grid.querySelectorAll(".calDay").forEach(cell=>{
+      cell.addEventListener("click", (e)=>{
+        const pill = e.target && e.target.closest ? e.target.closest("[data-cal-edit]") : null;
+        if (pill) return;
+        const dateStr = cell.getAttribute("data-cal-date");
+        if (dateStr) calSelectDate(dateStr);
+      });
+    });
+    // Click pill edit
+    grid.querySelectorAll("[data-cal-edit]").forEach(btn=>{
+      btn.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        const id = btn.getAttribute("data-cal-edit");
+        calLoadIntoForm(id);
+      });
+    });
+  }
+
+  // Selected day pane
+  const selected = state.calendar.ui.selectedDate || "";
+
+  // Selected day pane elements
+  const selectedPane = document.getElementById("calSelectedPane");
+  const selectedLabel = document.getElementById("calSelectedLabel");
+  const selectedHint = document.getElementById("calSelectedHint");
+  const dayList = document.getElementById("calDayList");
+  const addOnSel = document.getElementById("calAddOnSelected");
+  const hiddenSel = document.getElementById("calSelectedDate");
+  if (hiddenSel) hiddenSel.value = selected || "";
+  if (selectedPane) selectedPane.style.display = selected ? "block" : "none";
+  if (!selected) {
+    if (selectedLabel) selectedLabel.textContent = "";
+    if (selectedHint) selectedHint.textContent = "";
+    if (dayList) dayList.innerHTML = "";
+    return;
+  }
+
+  if (selectedLabel){
+    const d = new Date(selected + "T00:00:00");
+    selectedLabel.textContent = d.toLocaleDateString(undefined, {weekday:"long", month:"long", day:"numeric", year:"numeric"});
+  }
+  if (selectedHint){
+    const games = calGamesOnDate(selected);
+    selectedHint.textContent = games.length ? `${games.length} game(s)` : "No games";
+  }
+  if (addOnSel){
+    addOnSel.onclick = ()=>{
+      // switch to single mode and prefill date
+      calSetMode("single");
+      document.getElementById("calDate").value = selected;
+      document.getElementById("calStart").focus();
+    };
+  }
+  if (dayList){
+    const games = calGamesOnDate(selected);
+    if (!games.length){
+      dayList.innerHTML = `
+        <div class="empty" style="padding:10px 8px;">
+          <div class="hint">No games on this day. Tap <span class="kbd">+ Add game</span>.</div>
+        </div>
+      `;
+    } else {
+      dayList.innerHTML = games.map(g=>{
+        const start = new Date(g.dtStart);
+        const end = g.dtEnd ? new Date(g.dtEnd) : null;
+        const st = start.toLocaleTimeString(undefined, {hour:"numeric", minute:"2-digit"});
+        const et = end ? end.toLocaleTimeString(undefined, {hour:"numeric", minute:"2-digit"}) : "";
+        const when = et ? `${st}–${et}` : st;
+        const teamTag = g.team === "A" ? `<span class="pill" style="border-color: var(--teamA); color: var(--teamA);">${escapeHtml(teamName("A"))}</span>` :
+                        g.team === "B" ? `<span class="pill" style="border-color: var(--teamB); color: var(--teamB);">${escapeHtml(teamName("B"))}</span>` :
+                        `<span class="pill">League</span>`;
+        return `
+          <button class="card" data-cal-edit="${escapeHtml(g.id)}" style="text-align:left; cursor:pointer; border:1px solid var(--border); background: var(--panel2); padding:10px 12px; border-radius: var(--radius2); box-shadow:none;">
+            <div class="row" style="justify-content:space-between; gap:10px; align-items:flex-start;">
+              <div style="min-width:0;">
+                <div class="row" style="gap:8px; align-items:center; flex-wrap:wrap;">
+                  <div class="label" style="margin:0; font-size: 14px;">${escapeHtml(when)} • ${escapeHtml(g.summary)}</div>
+                  ${teamTag}
+                </div>
+                ${g.location ? `<div class="hint" style="margin-top:6px;"><span class="kbd">📍</span> ${escapeHtml(g.location)}</div>` : ""}
+                ${g.notes ? `<div class="hint" style="margin-top:6px; white-space:pre-wrap;">${escapeHtml(g.notes)}</div>` : ""}
+              </div>
+              <button class="btn ghost" data-cal-del="${escapeHtml(g.id)}" type="button" title="Delete" style="flex:0 0 auto;">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 7h12l-1 14H7L6 7zm3-3h6l1 2H8l1-2z"/></svg>
+              </button>
+            </div>
+          </button>
+        `;
+      }).join("");
+
+      dayList.querySelectorAll("[data-cal-edit]").forEach(btn=>{
+        btn.addEventListener("click", (e)=>{
+          if (e.target && e.target.closest && e.target.closest("[data-cal-del]")) return;
+          const id = btn.getAttribute("data-cal-edit");
+          calLoadIntoForm(id);
+        });
+      });
+      dayList.querySelectorAll("[data-cal-del]").forEach(btn=>{
+        btn.addEventListener("click", (e)=>{
+          e.stopPropagation();
+          const id = btn.getAttribute("data-cal-del");
+          calDelete(id);
+        });
+      });
+    }
+  }
+}
+
+function calSetMode(mode){
+  const singleBtn = document.getElementById("calModeSingle");
+  const recBtn = document.getElementById("calModeRecurring");
+  const fs = document.getElementById("calFormSingle");
+  const fr = document.getElementById("calFormRecurring");
+  if (!singleBtn || !recBtn || !fs || !fr) return;
+
+  const isSingle = mode === "single";
+  singleBtn.setAttribute("aria-selected", isSingle ? "true" : "false");
+  recBtn.setAttribute("aria-selected", isSingle ? "false" : "true");
+
+  fs.classList.toggle("hidden", !isSingle);
+  fr.classList.toggle("hidden", isSingle);
+
+  // Reset edit pill when switching away from single
+  if (!isSingle){
+    document.getElementById("calEditPill").style.display = "none";
+    document.getElementById("calDeleteEditing").style.display = "none";
+  }
+}
+
+function calWireModeToggle(){
+  const singleBtn = document.getElementById("calModeSingle");
+  const recBtn = document.getElementById("calModeRecurring");
+  if (singleBtn) singleBtn.addEventListener("click", ()=>calSetMode("single"));
+  if (recBtn) recBtn.addEventListener("click", ()=>calSetMode("recurring"));
+}
+
+
+function calLoadIntoForm(id){
+  const g = state.calendar.games.find(x=>x.id===id);
+  if (!g) return;
+
+  // ensure single mode
+  calSetMode("single");
+
+  const dt = new Date(g.dtStart);
+  const date = `${dt.getFullYear()}-${pad2(dt.getMonth()+1)}-${pad2(dt.getDate())}`;
+  const start = `${pad2(dt.getHours())}:${pad2(dt.getMinutes())}`;
+  let end = "";
+  if (g.dtEnd){
+    const de = new Date(g.dtEnd);
+    end = `${pad2(de.getHours())}:${pad2(de.getMinutes())}`;
+  }
+
+  // Move calendar selection to this date + month so it's visible
+  state.calendar.ui = state.calendar.ui || {};
+  state.calendar.ui.selectedDate = date;
+  state.calendar.ui.year = dt.getFullYear();
+  state.calendar.ui.month = dt.getMonth();
+
+  document.getElementById("calEditId").value = g.id;
+  document.getElementById("calTeam").value = g.team || "Both";
+  document.getElementById("calDate").value = date;
+  document.getElementById("calStart").value = start;
+  document.getElementById("calEnd").value = end;
+  document.getElementById("calOpponent").value = g.summary || "";
+  document.getElementById("calLocation").value = g.location || "";
+  document.getElementById("calNotes").value = g.notes || "";
+
+  const pill = document.getElementById("calEditPill");
+  pill.style.display = "inline-flex";
+
+  const delBtn = document.getElementById("calDeleteEditing");
+  if (delBtn){
+    delBtn.style.display = "inline-flex";
+    delBtn.onclick = ()=>calDelete(g.id);
+  }
+
+  calPersist();
+  renderCalendar();
+  setCalStatus("Loaded for editing.");
+}
+
+
+function calClearForm(){
+  document.getElementById("calEditId").value = "";
+  document.getElementById("calTeam").value = "Both";
+  document.getElementById("calDate").value = "";
+  document.getElementById("calStart").value = "";
+  document.getElementById("calEnd").value = "";
+  document.getElementById("calOpponent").value = "";
+  document.getElementById("calLocation").value = "";
+  document.getElementById("calNotes").value = "";
+  document.getElementById("calEditPill").style.display = "none";
+  const delBtn = document.getElementById("calDeleteEditing");
+  if (delBtn) delBtn.style.display = "none";
+  setCalStatus("");
+}
+
+function setCalStatus(msg){
+  const el = document.getElementById("calStatus");
+  if (!el) return;
+  el.textContent = msg || "";
+  if (!msg) return;
+  clearTimeout(setCalStatus._t);
+  setCalStatus._t = setTimeout(()=>{ el.textContent=""; }, 2200);
+}
+
+function calSaveFromForm(){
+  const id = document.getElementById("calEditId").value.trim();
+  const team = document.getElementById("calTeam").value || "Both";
+  const date = document.getElementById("calDate").value;
+  const start = document.getElementById("calStart").value;
+  const end = document.getElementById("calEnd").value;
+  const summary = document.getElementById("calOpponent").value.trim();
+  const location = document.getElementById("calLocation").value.trim();
+  const notes = document.getElementById("calNotes").value.trim();
+
+  if (!date || !start || !summary){
+    setCalStatus("Date, start time, and opponent/event are required.");
+    return;
+  }
+  const dtStart = new Date(`${date}T${start}:00`);
+  let dtEnd = null;
+  if (end){
+    dtEnd = new Date(`${date}T${end}:00`);
+    if (dtEnd <= dtStart){
+      // if end is earlier, assume it goes to next day
+      dtEnd = new Date(dtEnd.getTime() + 24*60*60*1000);
+    }
+  }
+
+  const g = normalizeGame({ id: id || calNewId(), team, summary, location, notes, dtStart, dtEnd });
+  const existingIdx = state.calendar.games.findIndex(x=>x.id===g.id);
+  if (existingIdx >= 0) state.calendar.games[existingIdx] = g;
+  else state.calendar.games.push(g);
+
+  sortGames();
+  calPersist();
+  renderCalendar();
+  setCalStatus(existingIdx>=0 ? "Updated game." : "Added game.");
+  calClearForm();
+}
+
+
+
+function calMakeGame({team="Both", date, startTime, endTime="", summary="Game", location="", notes=""}){
+  const dtStart = new Date(`${date}T${startTime}:00`);
+  let dtEnd = null;
+  if (endTime){
+    dtEnd = new Date(`${date}T${endTime}:00`);
+    if (dtEnd <= dtStart) dtEnd = new Date(dtEnd.getTime() + 24*60*60*1000);
+  }
+  return normalizeGame({ id: calNewId(), team, summary, location, notes, dtStart, dtEnd });
+}
+
+function addDays(d, days){
+  const x = new Date(d);
+  x.setDate(x.getDate() + days);
+  return x;
+}
+function weekdayToJs(code){
+  return ({SU:0, MO:1, TU:2, WE:3, TH:4, FR:5, SA:6})[code] ?? 2;
+}
+function nextDateOnOrAfter(dateObj, weekdayCode){
+  const target = weekdayToJs(weekdayCode);
+  const d = new Date(dateObj);
+  const delta = (target - d.getDay() + 7) % 7;
+  return addDays(d, delta);
+}
+function calAddWeeklySeries(){
+  const wd = document.getElementById("calWeekday")?.value || "TU";
+  const startDateStr = document.getElementById("calSeriesStartDate")?.value;
+  const st = document.getElementById("calSeriesStartTime")?.value || "19:00";
+  const et = document.getElementById("calSeriesEndTime")?.value || "";
+  const weeks = clampInt(document.getElementById("calSeriesWeeks")?.value, 1, 52, 10);
+  const team = document.getElementById("calSeriesTeam")?.value || "Both";
+  const oppTpl = (document.getElementById("calSeriesOpponent")?.value || "").trim();
+  const loc = (document.getElementById("calSeriesLocation")?.value || "").trim();
+
+  if (!startDateStr){
+    setCalStatus("Pick a start date for the series.");
+    return;
+  }
+  if (!st){
+    setCalStatus("Pick a start time for the series.");
+    return;
+  }
+
+  const base = new Date(startDateStr + "T00:00:00");
+  const first = nextDateOnOrAfter(base, wd);
+
+  let added = 0;
+  for (let i=0; i<weeks; i++){
+    const d = addDays(first, i*7);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth()+1).padStart(2,"0");
+    const dd = String(d.getDate()).padStart(2,"0");
+    const date = `${yyyy}-${mm}-${dd}`;
+
+    const summary = oppTpl ? oppTpl.replaceAll("{n}", String(i+1)) : "League Game";
+    const g = calMakeGame({
+      team,
+      date,
+      startTime: st,
+      endTime: et,
+      summary,
+      location: loc,
+      notes: ""
+    });
+    state.calendar.games.push(g);
+    added++;
+  }
+
+  sortGames();
+  calPersist();
+  renderCalendar();
+  setCalStatus(`Added ${added} games.`);
+}
+function calPrefillNextWeek(){
+  const dateStr = document.getElementById("calDate")?.value;
+  let d = dateStr ? new Date(dateStr + "T00:00:00") : null;
+
+  if (!d){
+    const startDateStr = document.getElementById("calSeriesStartDate")?.value;
+    if (startDateStr){
+      const base = new Date(startDateStr + "T00:00:00");
+      const wd = document.getElementById("calWeekday")?.value || "TU";
+      d = nextDateOnOrAfter(base, wd);
+    } else {
+      d = new Date();
+    }
+  } else {
+    d = addDays(d, 7);
+  }
+
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const dd = String(d.getDate()).padStart(2,"0");
+  const next = `${yyyy}-${mm}-${dd}`;
+
+  const st = document.getElementById("calSeriesStartTime")?.value || document.getElementById("calStart")?.value || "";
+  const et = document.getElementById("calSeriesEndTime")?.value || document.getElementById("calEnd")?.value || "";
+  const opp = document.getElementById("calSeriesOpponent")?.value || document.getElementById("calOpponent")?.value || "";
+  const loc = document.getElementById("calSeriesLocation")?.value || document.getElementById("calLocation")?.value || "";
+  const team = document.getElementById("calSeriesTeam")?.value || document.getElementById("calTeam")?.value || "Both";
+
+  document.getElementById("calEditId").value = "";
+  document.getElementById("calEditPill").style.display = "none";
+  document.getElementById("calTeam").value = team;
+  document.getElementById("calDate").value = next;
+  if (st) document.getElementById("calStart").value = st;
+  if (et) document.getElementById("calEnd").value = et;
+  document.getElementById("calOpponent").value = String(opp).replaceAll("{n}", "");
+  document.getElementById("calLocation").value = String(loc);
+  document.getElementById("calNotes").value = "";
+  setCalStatus("Prefilled next week.");
+}
+
+function calDelete(id){
+  const i = state.calendar.games.findIndex(x=>x.id===id);
+  if (i<0) return;
+  state.calendar.games.splice(i,1);
+  calPersist();
+  renderCalendar();
+  setCalStatus("Deleted.");
+  // if deleting currently editing
+  if (document.getElementById("calEditId").value === id) calClearForm();
+}
+
+function calExportICS(){
+  sortGames();
+  const now = new Date();
+  const lines = [];
+  lines.push("BEGIN:VCALENDAR");
+  lines.push("VERSION:2.0");
+  lines.push("PRODID:-//VolleySim Pro+//Calendar//EN");
+  lines.push("CALSCALE:GREGORIAN");
+  lines.push("METHOD:PUBLISH");
+  state.calendar.games.forEach(g=>{
+    const uid = g.id + "@volleysim";
+    const dtStart = new Date(g.dtStart);
+    const dtEnd = g.dtEnd ? new Date(g.dtEnd) : new Date(dtStart.getTime() + 90*60*1000); // default 90m
+    const summary = g.summary;
+    const descParts = [];
+    if (g.team && g.team !== "Both") descParts.push(`Team: ${teamName(g.team)}`);
+    if (g.notes) descParts.push(g.notes);
+    const description = descParts.join("\n");
+
+    lines.push("BEGIN:VEVENT");
+    lines.push(`UID:${icsEscape(uid)}`);
+    lines.push(`DTSTAMP:${toICSDateUTC(now)}`);
+    lines.push(`DTSTART:${toICSDateUTC(dtStart)}`);
+    lines.push(`DTEND:${toICSDateUTC(dtEnd)}`);
+    lines.push(`SUMMARY:${icsEscape(summary)}`);
+    if (g.location) lines.push(`LOCATION:${icsEscape(g.location)}`);
+    if (description) lines.push(`DESCRIPTION:${icsEscape(description)}`);
+    lines.push("END:VEVENT");
+  });
+  lines.push("END:VCALENDAR");
+
+  const ics = lines.join("\r\n");
+  const blob = new Blob([ics], {type:"text/calendar;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const fname = `volleysim_games_${new Date().toISOString().slice(0,10)}.ics`;
+  a.href = url;
+  a.download = fname;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1500);
+  setCalStatus("Exported ICS.");
+}
+
+function calImportICS(text){
+  const raw = String(text||"");
+  const blocks = raw.split(/BEGIN:VEVENT/i).slice(1).map(b=>"BEGIN:VEVENT"+b);
+  const imported = [];
+
+  for (const block of blocks){
+    const endIdx = block.search(/END:VEVENT/i);
+    const vevent = (endIdx>=0) ? block.slice(0, endIdx+9) : block;
+
+    // unfold lines (RFC 5545): lines starting with space/tab continue previous line
+    const unfolded = vevent.replace(/\r?\n[ \t]/g, "");
+    const lines = unfolded.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+
+    const getVal = (key)=>{
+      const line = lines.find(l=> l.toUpperCase().startsWith(key.toUpperCase()));
+      if (!line) return "";
+      const idx = line.indexOf(":");
+      return idx>=0 ? line.slice(idx+1) : "";
+    };
+
+    const dtStartStr = getVal("DTSTART");
+    const dtEndStr = getVal("DTEND");
+    const summary = icsUnescape(getVal("SUMMARY")) || "Game";
+    const location = icsUnescape(getVal("LOCATION"));
+    const desc = icsUnescape(getVal("DESCRIPTION"));
+
+    const dtStart = parseICSDate(dtStartStr);
+    if (!dtStart) continue;
+    const dtEnd = dtEndStr ? parseICSDate(dtEndStr) : null;
+
+    // infer team from description "Team: A/B"
+    let team = "Both";
+    const m = desc.match(/Team:\s*(A|B)\b/i);
+    if (m) team = m[1].toUpperCase();
+
+    // strip the "Team: X" line from notes if present
+    const notes = desc.replace(/^Team:\s*(A|B)\s*$/im, "").trim();
+
+    imported.push(normalizeGame({
+      id: calNewId(),
+      team,
+      summary,
+      location,
+      notes,
+      dtStart,
+      dtEnd
+    }));
+  }
+
+  if (!imported.length){
+    setCalStatus("No events found in that ICS.");
+    return;
+  }
+
+  // Merge: append, do not dedupe (ICS files can be messy). User can delete duplicates easily.
+  state.calendar.games = state.calendar.games.concat(imported);
+  sortGames();
+  calPersist();
+  renderCalendar();
+  setCalStatus(`Imported ${imported.length} event(s).`);
+}
+
+function calCopyTextSummary(){
+  sortGames();
+  const lines = [];
+  lines.push("VolleySim Schedule");
+  lines.push("------------------");
+  state.calendar.games.forEach(g=>{
+    const start = new Date(g.dtStart);
+    const end = g.dtEnd ? new Date(g.dtEnd) : null;
+    const day = start.toLocaleDateString(undefined, {weekday:"short", month:"short", day:"numeric"});
+    const st = start.toLocaleTimeString(undefined, {hour:"numeric", minute:"2-digit"});
+    const et = end ? end.toLocaleTimeString(undefined, {hour:"numeric", minute:"2-digit"}) : "";
+    const team = g.team === "Both" ? "" : ` [${teamName(g.team)}]`;
+    const when = et ? `${day} ${st}–${et}` : `${day} ${st}`;
+    const loc = g.location ? ` @ ${g.location}` : "";
+    lines.push(`• ${when}${team} — ${g.summary}${loc}`);
+    if (g.notes) lines.push(`  ${g.notes.replace(/\n/g, " / ")}`);
+  });
+  const text = lines.join("\n");
+  navigator.clipboard.writeText(text).then(()=>setCalStatus("Copied."), ()=>setCalStatus("Copy failed (browser permission)."));
+}
+
+
 /* =====================================================
    Tabs + wiring
 ===================================================== */
@@ -3226,20 +4850,22 @@ const TAB_KEY = "vb_active_tab_v7";
 
 function setTab(which, opts={scroll:true}){
   const tabs = [
-    {key:"home",   tab:"tabHome",   view:"viewHome"},
-    {key:"lineup", tab:"tabLineup", view:"viewLineup"},
-    {key:"sim",    tab:"tabSim",    view:"viewSim"},
-    {key:"coach",  tab:"tabCoach",  view:"viewCoach"},
-    {key:"rules",  tab:"tabRules",  view:"viewRules"},
+    {key:"home",     tab:null,         view:"viewHome"},
+    {key:"lineup",   tab:"tabLineup",   view:"viewLineup"},
+    {key:"sim",      tab:"tabSim",      view:"viewSim"},
+    {key:"coach",    tab:"tabCoach",    view:"viewCoach"},
+    {key:"split",    tab:"tabSplit",    view:"viewSplit"},
+    {key:"calendar", tab:"tabCalendar", view:"viewCalendar"},
+    {key:"rules",    tab:"tabRules",    view:"viewRules"},
   ];
 
   tabs.forEach(t=>{
     const viewEl = document.getElementById(t.view);
-    const tabEl  = document.getElementById(t.tab);
-    if (!viewEl || !tabEl) return;
+    const tabEl  = t.tab ? document.getElementById(t.tab) : null;
+    if (!viewEl) return;
     const active = (t.key === which);
     viewEl.classList.toggle("hidden", !active);
-    tabEl.setAttribute("aria-selected", active ? "true" : "false");
+    if (tabEl) tabEl.setAttribute("aria-selected", active ? "true" : "false");
   });
 
   state.ui.activeTab = which;
@@ -3248,6 +4874,8 @@ function setTab(which, opts={scroll:true}){
   if (which === "coach") renderCoach();
   if (which === "lineup"){ renderMyLineup(); renderMyInsights(); renderMyCourtPreview(); }
   if (which === "sim"){ updateSimWarnings(); renderScore(); updateCourt(); }
+  if (which === "split"){ renderSplit(); }
+  if (which === "calendar"){ renderCalendar(); }
   if (opts.scroll) window.scrollTo({top:0, behavior:"smooth"});
 }
 function renderEvents(){
@@ -3265,6 +4893,186 @@ function escapeHtml(s){
 }
 function escapeAttr(s){ return escapeHtml(s).replace(/"/g,"&quot;"); }
 
+
+/* =====================================================
+   League Split Calculator
+===================================================== */
+function round2(n){ return Math.round((Number(n) || 0) * 100) / 100; }
+function fmtMoney(n){
+  const v = round2(n);
+  const sign = v < 0 ? "-" : "";
+  const abs = Math.abs(v);
+  return `${sign}$${abs.toFixed(2)}`;
+}
+function ensureSplitDefaults(){
+  if (!state.leagueSplit){
+    state.leagueSplit = {
+      currency: "CAD",
+      A: { fee: 0, captain: "", players: [] },
+      B: { fee: 0, captain: "", players: [] },
+    };
+  }
+}
+function splitTeamData(team){
+  ensureSplitDefaults();
+  return state.leagueSplit[team];
+}
+function addSplitPlayer(team, presetName=""){
+  const t = splitTeamData(team);
+  t.players.push({ id: uid(), name: String(presetName || "").trim(), paid: 0 });
+  renderSplit();
+}
+function removeSplitPlayer(team, id){
+  const t = splitTeamData(team);
+  t.players = t.players.filter(p=>p.id !== id);
+  renderSplit();
+}
+function importRosterToSplit(team){
+  const t = splitTeamData(team);
+  const rosterNames = (state.teams?.[team]?.roster || []).map(p=>String(p.name||"").trim()).filter(Boolean);
+  const existing = new Set(t.players.map(p=>String(p.name||"").trim()).filter(Boolean).map(x=>x.toLowerCase()));
+  rosterNames.forEach(n=>{
+    if (!existing.has(n.toLowerCase())){
+      t.players.push({ id: uid(), name: n, paid: 0 });
+      existing.add(n.toLowerCase());
+    }
+  });
+  renderSplit();
+}
+function computeSplit(team){
+  const t = splitTeamData(team);
+  const fee = Number(t.fee) || 0;
+  const captain = String(t.captain || "").trim();
+  const players = Array.isArray(t.players) ? t.players : [];
+  const active = players
+    .map(p=>({ ...p, name: String(p.name||"").trim(), paid: Number(p.paid)||0 }))
+    .filter(p=>p.name);
+  const n = active.length;
+  const share = (n > 0) ? (fee / n) : 0;
+  const paidTotal = active.reduce((s,p)=>s + (Number(p.paid)||0), 0);
+  const rows = active.map(p=>{
+    const owe = round2(share - p.paid); // + => owes captain, - => refund
+    return { ...p, owe };
+  }).sort((a,b)=> (b.owe - a.owe));
+  const owes = rows.filter(r=>r.owe > 0.005);
+  const refunds = rows.filter(r=>r.owe < -0.005);
+  const neutral = rows.filter(r=>Math.abs(r.owe) <= 0.005);
+  // How much captain is short/over overall (positive => still needs to collect)
+  const captainNet = round2(fee - paidTotal);
+  return { fee, captain, n, share, paidTotal, captainNet, rows, owes, refunds, neutral };
+}
+function renderSplitTeam(team){
+  const t = splitTeamData(team);
+  const feeEl = document.getElementById(team === "A" ? "splitFeeA" : "splitFeeB");
+  const capEl = document.getElementById(team === "A" ? "splitCaptainA" : "splitCaptainB");
+  const rowsEl = document.getElementById(team === "A" ? "splitRowsA" : "splitRowsB");
+  const kpisEl = document.getElementById(team === "A" ? "splitKpisA" : "splitKpisB");
+  const sumEl = document.getElementById(team === "A" ? "splitSummaryA" : "splitSummaryB");
+  if (!feeEl || !capEl || !rowsEl || !kpisEl || !sumEl) return;
+
+  // keep state in sync with inputs
+  if (String(feeEl.value || "") !== "" && Number(feeEl.value) !== Number(t.fee)) t.fee = Number(feeEl.value) || 0;
+  if ((capEl.value ?? "") !== (t.captain ?? "")) t.captain = capEl.value || "";
+
+  const res = computeSplit(team);
+
+  kpisEl.innerHTML = `
+    <span class="pill">Players: <strong style="color:var(--text)">${res.n}</strong></span>
+    <span class="pill">Share: <strong style="color:var(--text)">${fmtMoney(res.share)}</strong></span>
+    <span class="pill">Paid: <strong style="color:var(--text)">${fmtMoney(res.paidTotal)}</strong></span>
+    <span class="pill">Fee: <strong style="color:var(--text)">${fmtMoney(res.fee)}</strong></span>
+  `;
+
+  // rows (editable)
+  rowsEl.innerHTML = (t.players.length ? t.players : [{id:"__empty__", name:"", paid:0}]).map(p=>{
+    if (p.id === "__empty__"){
+      return `<div class="splitRow">
+        <input type="text" value="" placeholder="Add a player name…" data-split-team="${team}" data-split-field="name" data-split-id="" />
+        <input type="number" value="" min="0" step="0.01" placeholder="0.00" data-split-team="${team}" data-split-field="paid" data-split-id="" />
+        <button class="miniBtn neutral" title="Add" data-split-action="quickAdd" data-split-team="${team}">+</button>
+      </div>`;
+    }
+    return `<div class="splitRow">
+      <input type="text" value="${escapeAttr(p.name||"")}" placeholder="Name" data-split-team="${team}" data-split-field="name" data-split-id="${escapeAttr(p.id)}" />
+      <input type="number" value="${(Number(p.paid)||0) ? String(Number(p.paid)||0) : ""}" min="0" step="0.01" placeholder="0.00" data-split-team="${team}" data-split-field="paid" data-split-id="${escapeAttr(p.id)}" />
+      <button class="miniBtn" title="Remove" data-split-action="remove" data-split-team="${team}" data-split-id="${escapeAttr(p.id)}">✕</button>
+    </div>`;
+  }).join("");
+
+  // summary / payouts
+  const cap = res.captain || `Team ${team} captain`;
+  const owesList = res.owes.length ? `<ul class="events" style="margin:0;">
+    ${res.owes.map(r=>`<li><b>${escapeHtml(r.name)}</b> owes <b>${escapeHtml(cap)}</b> <span class="moneyPos">${fmtMoney(r.owe)}</span></li>`).join("")}
+  </ul>` : `<div class="hint">No one owes anything (yet).</div>`;
+
+  const refundList = res.refunds.length ? `<ul class="events" style="margin:0;">
+    ${res.refunds.map(r=>`<li><b>${escapeHtml(cap)}</b> pays back <b>${escapeHtml(r.name)}</b> <span class="moneyNeg">${fmtMoney(Math.abs(r.owe))}</span></li>`).join("")}
+  </ul>` : `<div class="hint">No refunds needed.</div>`;
+
+  const netLine = (Math.abs(res.captainNet) <= 0.005)
+    ? `<div class="hint"><b>Balanced:</b> total paid matches the fee.</div>`
+    : (res.captainNet > 0
+        ? `<div class="hint"><b>Captain is short:</b> needs to collect <span class="moneyPos">${fmtMoney(res.captainNet)}</span> total.</div>`
+        : `<div class="hint"><b>Captain is over:</b> should pay back <span class="moneyNeg">${fmtMoney(Math.abs(res.captainNet))}</span> total.</div>`);
+
+  sumEl.innerHTML = `
+    ${netLine}
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:10px;">
+      <div>
+        <div class="pill" style="margin-bottom:8px;">Owes captain</div>
+        ${owesList}
+      </div>
+      <div>
+        <div class="pill" style="margin-bottom:8px;">Captain pays back</div>
+        ${refundList}
+      </div>
+    </div>
+  `;
+}
+function renderSplit(){
+  ensureSplitDefaults();
+  renderSplitTeam("A");
+  renderSplitTeam("B");
+
+  const a = computeSplit("A");
+  const b = computeSplit("B");
+  const combinedFee = round2(a.fee + b.fee);
+  const combinedPaid = round2(a.paidTotal + b.paidTotal);
+  const combinedNet = round2(combinedFee - combinedPaid);
+  const combinedEl = document.getElementById("splitCombined");
+  if (combinedEl){
+    combinedEl.innerHTML = `
+      <b>Combined fee:</b> ${fmtMoney(combinedFee)} &nbsp;•&nbsp;
+      <b>Combined paid:</b> ${fmtMoney(combinedPaid)} &nbsp;•&nbsp;
+      <b>Net:</b> ${Math.abs(combinedNet) <= 0.005 ? "<span class='moneyNeg'>$0.00</span>" : (combinedNet>0 ? `<span class='moneyPos'>${fmtMoney(combinedNet)}</span>` : `<span class='moneyNeg'>${fmtMoney(combinedNet)}</span>`)}
+      <div class="hint" style="margin-top:8px;">
+        Tip: If both teams share a single booking, you can put the full amount in one team and leave the other at $0 — or split the fee between them.
+      </div>
+    `;
+  }
+}
+function splitPlainText(){
+  const a = computeSplit("A");
+  const b = computeSplit("B");
+  const lines = [];
+  const addTeam = (team, res)=>{
+    const cap = res.captain || `Team ${team} captain`;
+    lines.push(`Team ${team} — Fee ${fmtMoney(res.fee)} — Players ${res.n} — Share ${fmtMoney(res.share)}`);
+    if (!res.n){ lines.push("  (No players)"); lines.push(""); return; }
+    res.rows.forEach(r=>{
+      const status = (Math.abs(r.owe) <= 0.005) ? "even" : (r.owe > 0 ? `owes ${fmtMoney(r.owe)}` : `gets back ${fmtMoney(Math.abs(r.owe))}`);
+      lines.push(`  - ${r.name}: paid ${fmtMoney(r.paid)} → ${status}`);
+    });
+    if (Math.abs(res.captainNet) <= 0.005) lines.push(`  Balanced: total paid matches fee.`);
+    else if (res.captainNet > 0) lines.push(`  Captain (${cap}) needs to collect ${fmtMoney(res.captainNet)} total.`);
+    else lines.push(`  Captain (${cap}) should pay back ${fmtMoney(Math.abs(res.captainNet))} total.`);
+    lines.push("");
+  };
+  addTeam("A", a);
+  addTeam("B", b);
+  return lines.join("\n");
+}
+
 /* =====================================================
    Init
 ===================================================== */
@@ -3274,6 +5082,52 @@ function init(){
   document.getElementById("themeToggle").addEventListener("click", ()=>{
     const cur = document.documentElement.getAttribute("data-theme") || "dark";
     setTheme(cur === "dark" ? "light" : "dark");
+  });
+
+  // team branding (names + colors)
+  loadBranding();
+  const aNameIn = document.getElementById("teamAName");
+  const bNameIn = document.getElementById("teamBName");
+  const aColIn = document.getElementById("teamAColor");
+  const bColIn = document.getElementById("teamBColor");
+  if (aNameIn) aNameIn.value = state.branding.teamAName || "Team A";
+  if (bNameIn) bNameIn.value = state.branding.teamBName || "Team B";
+  if (aColIn) aColIn.value = state.branding.teamAColor || "#ea580c";
+  if (bColIn) bColIn.value = state.branding.teamBColor || "#dc2626";
+  applyTeamBrandingToUI();
+
+  const brandingStatus = document.getElementById("teamBrandingStatus");
+  const setBrandStatus = (txt)=>{ if(brandingStatus) brandingStatus.textContent = txt || ""; };
+
+  const applyBtn = document.getElementById("applyTeamBranding");
+  if (applyBtn) applyBtn.addEventListener("click", ()=>{
+    state.branding.teamAName = String(aNameIn?.value || "Team A").trim() || "Team A";
+    state.branding.teamBName = String(bNameIn?.value || "Team B").trim() || "Team B";
+    state.branding.teamAColor = String(aColIn?.value || "#ea580c").trim() || "#ea580c";
+    state.branding.teamBColor = String(bColIn?.value || "#dc2626").trim() || "#dc2626";
+    saveBranding();
+    applyTeamBrandingToUI();
+    renderSplit();
+    renderCalendar();
+    renderCoach();
+    setBrandStatus("Saved.");
+    setTimeout(()=>setBrandStatus(""), 1200);
+  });
+
+  const resetBtn = document.getElementById("resetTeamBranding");
+  if (resetBtn) resetBtn.addEventListener("click", ()=>{
+    state.branding = { teamAName:"Team A", teamBName:"Team B", teamAColor:"#ea580c", teamBColor:"#dc2626" };
+    if (aNameIn) aNameIn.value = state.branding.teamAName;
+    if (bNameIn) bNameIn.value = state.branding.teamBName;
+    if (aColIn) aColIn.value = state.branding.teamAColor;
+    if (bColIn) bColIn.value = state.branding.teamBColor;
+    saveBranding();
+    applyTeamBrandingToUI();
+    renderSplit();
+    renderCalendar();
+    renderCoach();
+    setBrandStatus("Reset.");
+    setTimeout(()=>setBrandStatus(""), 1200);
   });
 
   // load demo rosters (Gemini base idea)
@@ -3328,19 +5182,79 @@ function init(){
   });
 
   // tabs
-  document.getElementById("tabHome").addEventListener("click", ()=>setTab("home"));
+  const brandHome = document.getElementById("brandHome");
+  if (brandHome){
+    brandHome.addEventListener("click", ()=>setTab("home"));
+    brandHome.addEventListener("keydown", (e)=>{ if (e.key==="Enter"||e.key===" "){ e.preventDefault(); setTab("home"); } });
+  }
   document.getElementById("tabLineup").addEventListener("click", ()=>setTab("lineup"));
   document.getElementById("tabSim").addEventListener("click", ()=>setTab("sim"));
   document.getElementById("tabCoach").addEventListener("click", ()=>setTab("coach"));
   document.getElementById("tabRules").addEventListener("click", ()=>setTab("rules"));
-
-  // cross-nav buttons
+  document.getElementById("tabSplit").addEventListener("click", ()=>setTab("split"));
+  document.getElementById("tabCalendar").addEventListener("click", ()=>setTab("calendar"));
+// cross-nav buttons
   document.getElementById("goLineup").addEventListener("click", ()=>setTab("lineup"));
   document.getElementById("goSim").addEventListener("click", ()=>setTab("sim"));
   document.getElementById("simGoHome").addEventListener("click", ()=>setTab("home"));
   document.getElementById("lineupGoHome").addEventListener("click", ()=>setTab("home"));
   document.getElementById("lineupGoSim").addEventListener("click", ()=>setTab("sim"));
   document.getElementById("rulesGoHome").addEventListener("click", ()=>setTab("home"));
+  document.getElementById("splitGoHome").addEventListener("click", ()=>setTab("home"));
+  const extrasGoHome = document.getElementById("extrasGoHome");
+  if (extrasGoHome) extrasGoHome.addEventListener("click", ()=>setTab("home"));
+  // league split wiring
+  ensureSplitDefaults();
+  document.getElementById("splitAddA").addEventListener("click", ()=>addSplitPlayer("A"));
+  document.getElementById("splitAddB").addEventListener("click", ()=>addSplitPlayer("B"));
+  document.getElementById("splitImportA").addEventListener("click", ()=>importRosterToSplit("A"));
+  document.getElementById("splitImportB").addEventListener("click", ()=>importRosterToSplit("B"));
+  document.getElementById("splitCopySummary").addEventListener("click", ()=>copyToClipboard(splitPlainText()));
+
+  ["splitFeeA","splitCaptainA","splitFeeB","splitCaptainB"].forEach(id=>{
+    const el = document.getElementById(id);
+    el.addEventListener("input", ()=>renderSplit());
+  });
+
+  const splitDelegate = (e)=>{
+    const t = e.target;
+    if (!t) return;
+
+    // quick add row (empty state)
+    if (t.matches('button[data-split-action="quickAdd"]')){
+      const team = t.getAttribute("data-split-team");
+      addSplitPlayer(team);
+      return;
+    }
+
+    const actionBtn = t.closest?.('button[data-split-action]');
+    if (actionBtn){
+      const action = actionBtn.getAttribute("data-split-action");
+      const team = actionBtn.getAttribute("data-split-team");
+      const id = actionBtn.getAttribute("data-split-id");
+      if (action === "remove") removeSplitPlayer(team, id);
+      return;
+    }
+
+    const team = t.getAttribute?.("data-split-team");
+    const field = t.getAttribute?.("data-split-field");
+    const id = t.getAttribute?.("data-split-id");
+    if (!team || !field) return;
+
+    const data = splitTeamData(team);
+    const p = data.players.find(x=>x.id === id);
+    if (!p) return;
+
+    if (field === "name") p.name = String(t.value || "").trim();
+    if (field === "paid") p.paid = Number(t.value) || 0;
+    renderSplit();
+  };
+
+  document.getElementById("splitRowsA").addEventListener("input", splitDelegate);
+  document.getElementById("splitRowsA").addEventListener("click", splitDelegate);
+  document.getElementById("splitRowsB").addEventListener("input", splitDelegate);
+  document.getElementById("splitRowsB").addEventListener("click", splitDelegate);
+
 
   // lineup builder (my team)
   document.getElementById("myTeamA").addEventListener("click", ()=>setMyTeam("A"));
@@ -3379,11 +5293,68 @@ function init(){
 
   document.getElementById("btnPrint").addEventListener("click", ()=>window.print());
 
+  // calendar
+  calLoad();
+  const fileEl = document.getElementById("calIcsFile");
+  if (fileEl){
+    fileEl.addEventListener("change", async (e)=>{
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      const text = await f.text();
+      calImportICS(text);
+      // reset so same file can be re-imported
+      e.target.value = "";
+    });
+  }
+  const exBtn = document.getElementById("calExportIcs");
+  if (exBtn) exBtn.addEventListener("click", calExportICS);
+  const saveBtn = document.getElementById("calSaveGame");
+  if (saveBtn) saveBtn.addEventListener("click", calSaveFromForm);
+  const clearBtn = document.getElementById("calClearForm");
+  if (clearBtn) clearBtn.addEventListener("click", calClearForm);
+  const copyBtn = document.getElementById("calCopySummary");
+  if (copyBtn) copyBtn.addEventListener("click", calCopyTextSummary);
+
+  const seriesBtn = document.getElementById("calAddWeeklySeries");
+  if (seriesBtn) seriesBtn.addEventListener("click", calAddWeeklySeries);
+  const prefillBtn = document.getElementById("calPrefillNextWeek");
+  if (prefillBtn) prefillBtn.addEventListener("click", calPrefillNextWeek);
+  // month navigation + mode toggles
+  const prevM = document.getElementById("calPrevMonth");
+  const nextM = document.getElementById("calNextMonth");
+  const todayM = document.getElementById("calToday");
+  if (prevM) prevM.addEventListener("click", ()=>{
+    calEnsureUI();
+    let y = state.calendar.ui.year, m = state.calendar.ui.month - 1;
+    if (m < 0){ m = 11; y--; }
+    calSetMonth(y,m);
+  });
+  if (nextM) nextM.addEventListener("click", ()=>{
+    calEnsureUI();
+    let y = state.calendar.ui.year, m = state.calendar.ui.month + 1;
+    if (m > 11){ m = 0; y++; }
+    calSetMonth(y,m);
+  });
+  if (todayM) todayM.addEventListener("click", ()=>{
+    const now = new Date();
+    state.calendar.ui = state.calendar.ui || {};
+    state.calendar.ui.year = now.getFullYear();
+    state.calendar.ui.month = now.getMonth();
+    state.calendar.ui.selectedDate = `${now.getFullYear()}-${pad2(now.getMonth()+1)}-${pad2(now.getDate())}`;
+    calPersist();
+    renderCalendar();
+  });
+
+  calWireModeToggle();
+  calSetMode("single");
+
   // initial render
   renderRosters();
   renderLineups();
   renderScore();
   renderEvents();
+  renderSplit();
+  renderCalendar();
   updateCourt();
   renderCoach();
   setMyTeam(getMyTeam());
