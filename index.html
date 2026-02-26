@@ -1190,14 +1190,46 @@
 
     /* Mobile: move view tabs to bottom bar */
     @media (max-width: 760px){
-      header{ position: sticky; top: 0; }
+      /*
+        iOS Safari quirk: `position: fixed` descendants can behave like they're
+        fixed to a `backdrop-filter` ancestor instead of the viewport.
+        On mobile, disable the header blur so the bottom tab bar stays pinned
+        to the bottom and doesn't jump up over the logo/title.
+      */
+      header{
+        position: sticky;
+        top: 0;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        /* Keep the same visual style using a pseudo element (see below) */
+        background: transparent;
+        isolation: isolate;
+      }
+
+      /* Recreate the blurred header background without making header an ancestor
+         with `backdrop-filter` (prevents the fixed bottom nav from jumping). */
+      header::before{
+        content:"";
+        position:absolute;
+        inset:0;
+        pointer-events:none;
+        z-index:-1;
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        background: linear-gradient(to bottom, rgba(0,0,0,.28), rgba(0,0,0,.08));
+      }
+      [data-theme="light"] header::before{
+        background: linear-gradient(to bottom, rgba(255,255,255,.75), rgba(255,255,255,.55));
+      }
       .header-inner{
         padding: 12px 12px;
         gap: 10px;
+        flex-wrap: nowrap;
+        justify-content: space-between;
       }
       .brand{ min-width: 0; }
       .brand small{ display:none; }
-      .header-actions{ margin-left: 0; }
+      .header-actions{ margin-left: auto; }
 
       .tabs{
         position: fixed;
