@@ -1120,9 +1120,9 @@
       padding:6px;
       user-select:none;
     }
-    [data-theme="dark"] .player-token{ background: rgba(255,255,255,.94); }
-    .player-token .token-role { display: none !important; }
-    .lcToken .lcRole { display: none !important; }
+    [data-theme="dark"] .player-token{
+      background: rgba(255,255,255,.94);
+    }
     .team-a-token{ border-color: var(--teamA); background: linear-gradient(135deg, var(--teamA_strong), rgba(255,255,255,.92) 62%); }
     .team-b-token{ border-color: var(--teamB); background: linear-gradient(135deg, var(--teamB_strong), rgba(255,255,255,.92) 62%); }
 
@@ -2252,6 +2252,18 @@
   <div class="card-header">
     <div>
       <h2>🗺️ Lineup Map</h2>
+      <p>Quick visual check of both lineups (including selected substitutes).</p>
+      <div class="inlineSubMode" style="max-width:420px; margin-top:10px;">
+        <label for="subModeHomeMy">My team substitute plan</label>
+        <select id="subModeHomeMy">
+          <option value="none">No automatic substitutes</option>
+          <option value="single-left">One substitute on the left side</option>
+          <option value="single-right">One substitute on the right side</option>
+          <option value="all-left">All substitutes on the left side</option>
+          <option value="all-right">All substitutes on the right side</option>
+          <option value="split">Split substitutes across both sides</option>
+        </select>
+      </div>
     </div>
   </div>
   <div class="card-body">
@@ -2737,6 +2749,18 @@
 </div>
 <div class="benchWrap no-print" id="myBenchWrap">
   <div class="benchTitle">Bench (Substitutes) <small>Drag onto the court to sub in</small></div>
+  <div class="inlineSubMode">
+    <label for="subModeBenchMy">Substitute plan</label>
+    <select id="subModeBenchMy">
+      <option value="none">No automatic substitutes</option>
+      <option value="single-left">One substitute on the left side</option>
+      <option value="single-right">One substitute on the right side</option>
+      <option value="all-left">All substitutes on the left side</option>
+      <option value="all-right">All substitutes on the right side</option>
+      <option value="split">Split substitutes across both sides</option>
+    </select>
+  </div>
+  <div class="benchPills" id="bench-my"></div>
 </div>
 <div class="rowBtns" id="myCourtControls" style="margin-top:12px; justify-content:center; flex-wrap:wrap;">
 <button class="btn primary" id="btnMyRotate">
@@ -2832,18 +2856,18 @@
   </div>
   <div class="card-body">
     <div class="inlineSubMode">
-      <label for="globalSubMode">Global Substitute Plan (Syncs across Home/Lineup/Sim)</label>
-      <select id="globalSubMode" onchange="syncSubMode(this.value)">
+      <label for="subPlannerModeMy">Substitute plan</label>
+      <select id="subPlannerModeMy">
         <option value="none">No automatic substitutes</option>
-        <option value="single-left">One sub (Left Back → Left Front)</option>
-        <option value="single-right">One sub (Right Front → Right Back)</option>
-        <option value="all-left">All subs on left side</option>
-        <option value="all-right">All subs on right side</option>
+        <option value="single-left">One substitute on the left side</option>
+        <option value="single-right">One substitute on the right side</option>
+        <option value="all-left">All substitutes on the left side</option>
+        <option value="all-right">All substitutes on the right side</option>
         <option value="split">Split substitutes across both sides</option>
       </select>
     </div>
     <div class="subPlanTable" id="subPlannerMy"></div>
-    <div class="hint" style="margin-top:12px; border-top:1px solid var(--border); padding-top:10px;">
+    <div class="hint" style="margin-top:8px;">
       Left side: comes in at <b>Left Back</b> and leaves before entering the front row. Right side: comes in to <b>serve</b> at <b>Right Back</b>, then leaves before entering the front row.
     </div>
   </div>
