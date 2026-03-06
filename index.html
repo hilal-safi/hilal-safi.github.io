@@ -1113,7 +1113,7 @@
       transform: translate(-50%, -50%);
       z-index: 10;
       background: rgba(255,255,255,.92);
-      color: #111827;
+      color: #000000 !important;
       box-shadow: 0 10px 18px rgba(0,0,0,0.30);
       transition: top 0.50s cubic-bezier(.2,.95,.2,1), left 0.50s cubic-bezier(.2,.95,.2,1), transform .22s ease, box-shadow .22s ease;
       text-align:center;
@@ -1486,7 +1486,7 @@
       border-radius: 14px;
       border: 2px solid rgba(255,255,255,.18);
       background: rgba(255,255,255,.92);
-      color:#0b1220;
+      color: #000000 !important;
       box-shadow: 0 10px 18px rgba(0,0,0,.25);
       padding: 10px 10px 9px 10px;
       display:flex;
@@ -3341,8 +3341,10 @@
   <div class="splitGrid">
 <script>
 /* Fix Calendar Month Navigation */
-function changeMonth(dir) {
-  state.calDate.setMonth(state.calDate.getMonth() + dir);
+function changeMonth(dir) { 
+  const newDate = new Date(state.calDate.getTime());
+  newDate.setMonth(newDate.getMonth() + dir);
+  state.calDate = newDate;
   renderCalendar();
 }
 
