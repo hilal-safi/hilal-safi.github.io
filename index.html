@@ -1147,6 +1147,12 @@
       display:none;
     }
     .tokenRoleOn .token-role{display:inline-flex;}
+    .simOverlayBanners{position:sticky; top:10px; z-index:50; display:flex; flex-direction:column; gap:8px; pointer-events:none; margin-bottom:10px;}
+    .simOverlayBanner{align-self:center; max-width:min(760px, calc(100% - 24px)); background:rgba(8,12,20,.88); color:#fff; border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:10px 14px; box-shadow:0 12px 30px rgba(0,0,0,.28); font-weight:800; backdrop-filter: blur(10px); opacity:0; transform:translateY(-8px); transition:opacity .18s ease, transform .18s ease;}
+    .simOverlayBanner.show{opacity:1; transform:translateY(0);}
+    .inlineSubMode{margin:10px 0 12px;}
+    .inlineSubMode label{display:block; margin-bottom:6px; font-weight:800;}
+    .inlineSubMode select{width:100%;}
 
     .is-serving{
       outline: 3px solid rgba(112,214,255,.55);
@@ -2239,6 +2245,17 @@
     <div>
       <h2>🗺️ Lineup Map</h2>
       <p>Quick visual check of both lineups (including selected substitutes).</p>
+      <div class="inlineSubMode" style="max-width:420px; margin-top:10px;">
+        <label for="subModeHomeMy">My team substitute plan</label>
+        <select id="subModeHomeMy">
+          <option value="none">No automatic substitutes</option>
+          <option value="single-left">One substitute on the left side</option>
+          <option value="single-right">One substitute on the right side</option>
+          <option value="all-left">All substitutes on the left side</option>
+          <option value="all-right">All substitutes on the right side</option>
+          <option value="split">Split substitutes across both sides</option>
+        </select>
+      </div>
     </div>
   </div>
   <div class="card-body">
@@ -2721,6 +2738,17 @@
 </div>
 <div class="benchWrap no-print" id="myBenchWrap">
   <div class="benchTitle">Bench (Substitutes) <small>Drag onto the court to sub in</small></div>
+  <div class="inlineSubMode">
+    <label for="subModeBenchMy">Substitute plan</label>
+    <select id="subModeBenchMy">
+      <option value="none">No automatic substitutes</option>
+      <option value="single-left">One substitute on the left side</option>
+      <option value="single-right">One substitute on the right side</option>
+      <option value="all-left">All substitutes on the left side</option>
+      <option value="all-right">All substitutes on the right side</option>
+      <option value="split">Split substitutes across both sides</option>
+    </select>
+  </div>
   <div class="benchPills" id="bench-my"></div>
 </div>
 <div class="rowBtns" id="myCourtControls" style="margin-top:12px; justify-content:center; flex-wrap:wrap;">
@@ -2816,6 +2844,17 @@
     </div>
   </div>
   <div class="card-body">
+    <div class="inlineSubMode">
+      <label for="subPlannerModeMy">Substitute plan</label>
+      <select id="subPlannerModeMy">
+        <option value="none">No automatic substitutes</option>
+        <option value="single-left">One substitute on the left side</option>
+        <option value="single-right">One substitute on the right side</option>
+        <option value="all-left">All substitutes on the left side</option>
+        <option value="all-right">All substitutes on the right side</option>
+        <option value="split">Split substitutes across both sides</option>
+      </select>
+    </div>
     <div class="subPlanTable" id="subPlannerMy"></div>
     <div class="hint" style="margin-top:8px;">
       Left side: comes in at <b>Left Back</b> and leaves before entering the front row. Right side: comes in to <b>serve</b> at <b>Right Back</b>, then leaves before entering the front row.
@@ -2853,6 +2892,10 @@
 <div>
 <h2>🎮 Simulation</h2>
 <div class="hint"><span class="teamBadge both" id="simTeamsBadge"></span></div>
+<div class="simOverlayBanners" id="simOverlayBanners">
+  <div class="simOverlayBanner" id="simScoreBanner"></div>
+  <div class="simOverlayBanner" id="simRotateBanner"></div>
+</div>
 <p>Rally scoring + side-out rotations. Uses your current Team A / Team B lineups.</p>
 </div>
 <div class="rowBtns no-print">
@@ -3038,10 +3081,12 @@
 <div class="simBenchGrid no-print">
   <div class="benchWrap">
     <div class="benchTitle"><span>Team A bench</span> <small>drag to sub in</small></div>
+    <div class="inlineSubMode"><label for="subModeBenchA">Substitute plan</label><select id="subModeBenchA"><option value="none">No automatic substitutes</option><option value="single-left">One substitute on the left side</option><option value="single-right">One substitute on the right side</option><option value="all-left">All substitutes on the left side</option><option value="all-right">All substitutes on the right side</option><option value="split">Split substitutes across both sides</option></select></div>
     <div class="benchPills" id="bench-a-sim"></div>
   </div>
   <div class="benchWrap">
     <div class="benchTitle"><span>Team B bench</span> <small>drag to sub in</small></div>
+    <div class="inlineSubMode"><label for="subModeBenchB">Substitute plan</label><select id="subModeBenchB"><option value="none">No automatic substitutes</option><option value="single-left">One substitute on the left side</option><option value="single-right">One substitute on the right side</option><option value="all-left">All substitutes on the left side</option><option value="all-right">All substitutes on the right side</option><option value="split">Split substitutes across both sides</option></select></div>
     <div class="benchPills" id="bench-b-sim"></div>
   </div>
 </div>
@@ -4304,6 +4349,8 @@ function setMyTeam(team){
   renderMyInsights();
   renderMyCourtPreview();
   renderAllBenches();
+  renderSubPlannerMy();
+  syncSubModeMirrors();
 }
 
 function addMyPlayer(){
@@ -4500,7 +4547,7 @@ function renderMyCourtPreview(){
     } else {
       token.classList.remove("empty");
       nameEl.textContent = formatPlayerShort(p);
-      roleEl.textContent = roleLabel(p.role);
+      roleEl.textContent = "";
     }
     token.classList.toggle("lcServing", z === 1);
   });
@@ -4518,6 +4565,95 @@ function renderMyCourtPreview(){
    - Right side serve: substitutes come in to serve at Right Back (zone 1) and must leave before Left Front (zone 4).
    - You can select multiple substitutes for either side; the app will cycle through them.
 ===================================================== */
+function getAvailableBenchPool(team){
+  const roster = state.teams[team].roster || [];
+  const onCourt = lineupUsedIds(team);
+  return roster.filter(p => !onCourt.has(p.id) && p.available !== false);
+}
+
+function getSubModeValue(team){
+  return (state.teams[team] && state.teams[team].subMode) ? state.teams[team].subMode : "none";
+}
+
+function inferSubMode(team){
+  ensureSubState(team);
+  const left = (state.teams[team].subs.leftSide.candidates || []).filter(Boolean);
+  const right = (state.teams[team].subs.rightSide.candidates || []).filter(Boolean);
+  const total = left.length + right.length;
+  if (!total) return "none";
+  if (left.length && !right.length) return total === 1 ? "single-left" : "all-left";
+  if (right.length && !left.length) return total === 1 ? "single-right" : "all-right";
+  return "split";
+}
+
+function applySubModePreset(team, mode){
+  ensureSubState(team);
+  const t = state.teams[team];
+  const bench = getAvailableBenchPool(team);
+  const ids = bench.map(p=>p.id);
+  const left = [];
+  const right = [];
+
+  forceExitAllSubs(team);
+
+  if (mode === "single-left" && ids[0]) left.push(ids[0]);
+  else if (mode === "single-right" && ids[0]) right.push(ids[0]);
+  else if (mode === "all-left") left.push(...ids);
+  else if (mode === "all-right") right.push(...ids);
+  else if (mode === "split") ids.forEach((id, idx)=> (idx % 2 === 0 ? left : right).push(id));
+
+  t.subs.leftSide.candidates = left;
+  t.subs.rightSide.candidates = right;
+  t.subMode = mode || "none";
+
+  renderAutoSubsSelectors();
+  renderMySubLanes();
+  renderSimSubLanes();
+  renderHomeMap();
+  renderSubPlannerMy();
+  renderAllBenches();
+}
+
+function syncSubModeMirrors(){
+  const myTeam = getMyTeam();
+  const map = {
+    subPlannerModeMy: getSubModeValue(myTeam),
+    subModeBenchMy: getSubModeValue(myTeam),
+    subModeHomeMy: getSubModeValue(myTeam),
+    subModeBenchA: getSubModeValue("A"),
+    subModeBenchB: getSubModeValue("B")
+  };
+  Object.entries(map).forEach(([id,val])=>{
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  });
+}
+
+function wireSubModeControl(id, teamProvider){
+  const el = document.getElementById(id);
+  if (!el || el.dataset.subModeWired === "1") return;
+  el.dataset.subModeWired = "1";
+  el.addEventListener("change", ()=>{
+    const team = typeof teamProvider === "function" ? teamProvider() : teamProvider;
+    applySubModePreset(team, el.value || "none");
+    syncSubModeMirrors();
+  });
+}
+
+function showOverlayBanner(id, msg){
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (el._bannerTimer) clearTimeout(el._bannerTimer);
+  el.textContent = msg || "";
+  el.classList.remove("show");
+  if (!msg) return;
+  requestAnimationFrame(()=>el.classList.add("show"));
+  el._bannerTimer = setTimeout(()=>el.classList.remove("show"), 1800);
+}
+
+function showSimScoreBanner(msg){ showOverlayBanner("simScoreBanner", msg); }
+function showSimRotateBanner(msg){ showOverlayBanner("simRotateBanner", msg); }
+
 function ensureSubState(team){
   const t = state.teams[team];
   if (!t.subs) t.subs = {};
@@ -4660,6 +4796,7 @@ function updateSubAssignment(team, pid, side){
 
   t.subs.leftSide.candidates = Array.from(left);
   t.subs.rightSide.candidates = Array.from(right);
+  t.subMode = inferSubMode(team);
 
   // rerender shared UI
   renderAutoSubsSelectors();
@@ -4680,6 +4817,8 @@ function renderSubPlannerMy(){
   const onCourt = lineupUsedIds(team);
 
   const bench = roster.filter(p => !onCourt.has(p.id) && (p.available !== false));
+  const plannerMode = document.getElementById("subPlannerModeMy");
+  if (plannerMode) plannerMode.value = getSubModeValue(team);
   const left = new Set(state.teams[team].subs.leftSide.candidates || []);
   const right = new Set(state.teams[team].subs.rightSide.candidates || []);
 
@@ -4798,6 +4937,7 @@ function renderAutoSubsSelectors(){
   bindSelect("subRightA", "A", "rightSide");
   bindSelect("subLeftB", "B", "leftSide");
   bindSelect("subRightB", "B", "rightSide");
+  syncSubModeMirrors();
 }
 
 function applyAutoSubsAfterRotation(team){
@@ -4805,44 +4945,21 @@ function applyAutoSubsAfterRotation(team){
 
   ensureSubState(team);
   const t = state.teams[team];
-
-  // Exit: if an active substitute is now in Left Front (zone 4), swap them out.
-  const maybeExit = (groupKey)=>{
-    const g = t.subs[groupKey];
-    if (!g.activePid || !g.replacedPid) return;
-
-    const z = zoneOfPid(team, g.activePid);
-    if (z !== 4) return;
-
-    const subP = getPlayer(team, g.activePid);
-    const origP = getPlayer(team, g.replacedPid);
-
-    // Put the original back into zone 4
-    setZoneOccupant(team, 4, g.replacedPid);
-
-    // Clear active
-    g.activePid = null;
-    g.replacedPid = null;
-
-    if (subP && origP){
-      pushEvent(`${teamName(team)} substitution: ${origP.name} returns (Left Front), ${subP.name} goes to the bench.`);
-    }
+  const rules = {
+    leftSide: { entryZone: 5, exitZone: 4, entryLabel: "left side" },
+    rightSide:{ entryZone: 1, exitZone: 2, entryLabel: "right side" }
   };
 
-  maybeExit("leftSide");
-  maybeExit("rightSide");
-
-  // Entry helper
   const pickCandidate = (groupKey)=>{
     const g = t.subs[groupKey];
     const ids = (g.candidates || []).filter(Boolean);
     if (!ids.length) return null;
-
     const onCourt = lineupUsedIds(team);
-    for (let i=0; i<ids.length; i++){
+    for (let i=0; i<ids.length; i++) {
       const idx = (g.cycle + i) % ids.length;
       const pid = ids[idx];
-      if (!onCourt.has(pid) && getPlayer(team, pid)){
+      const p = getPlayer(team, pid);
+      if (p && p.available !== false && !onCourt.has(pid)) {
         g.cycle = (idx + 1) % ids.length;
         return pid;
       }
@@ -4850,31 +4967,41 @@ function applyAutoSubsAfterRotation(team){
     return null;
   };
 
-  const maybeEnter = (groupKey, entryZone, entryLabel)=>{
+  const messages = [];
+
+  Object.entries(rules).forEach(([groupKey, rule])=>{
     const g = t.subs[groupKey];
-    if (g.activePid) return;
+    if (!g) return;
 
-    const inPid = pickCandidate(groupKey);
-    if (!inPid) return;
-
-    const outPid = setZoneOccupant(team, entryZone, inPid);
-    if (!outPid) return;
-
-    g.activePid = inPid;
-    g.replacedPid = outPid;
-
-    const subP = getPlayer(team, inPid);
-    const origP = getPlayer(team, outPid);
-    if (subP && origP){
-      pushEvent(`${teamName(team)} substitution: ${subP.name} in for ${origP.name} (${entryLabel}).`);
+    if (g.activePid && g.replacedPid) {
+      const activeZone = zoneOfPid(team, g.activePid);
+      if (activeZone === rule.exitZone) {
+        const subP = getPlayer(team, g.activePid);
+        const origP = getPlayer(team, g.replacedPid);
+        setZoneOccupant(team, rule.exitZone, g.replacedPid);
+        g.activePid = null;
+        g.replacedPid = null;
+        if (subP && origP) messages.push(`${teamName(team)} rotate: ${origP.name} in, ${subP.name} out.`);
+      }
     }
-  };
 
-  // Right side serve: after rotation, the server is in zone 1
-  maybeEnter("rightSide", 1, "Right Back serve");
-  // Left side: after rotation, Left Back is zone 5
-  maybeEnter("leftSide", 5, "Left Back");
+    if (!g.activePid) {
+      const inPid = pickCandidate(groupKey);
+      if (!inPid) return;
+      const outPid = setZoneOccupant(team, rule.entryZone, inPid);
+      if (!outPid || outPid === inPid) return;
+      g.activePid = inPid;
+      g.replacedPid = outPid;
+      const subP = getPlayer(team, inPid);
+      const origP = getPlayer(team, outPid);
+      if (subP && origP) messages.push(`${teamName(team)} rotate: ${subP.name} in, ${origP.name} out.`);
+    }
+  });
+
+  messages.forEach(msg=>pushEvent(msg));
+  if (messages.length) showSimRotateBanner(messages.join(' '));
 }
+
 
 
 /* =====================================================
@@ -4897,7 +5024,7 @@ function lineupUsedIds(team){
 function benchPlayers(team){
   const roster = state.teams[team].roster || [];
   const used = lineupUsedIds(team);
-  return roster.filter(p => !used.has(p.id));
+  return roster.filter(p => !used.has(p.id) && p.available !== false);
 }
 
 function renderBench(team, containerId, context){
@@ -4949,6 +5076,7 @@ function renderAllBenches(){
   renderBench("A", "bench-a-sim", "sim");
   renderBench("B", "bench-b-sim", "sim");
   renderAutoSubsSelectors();
+  syncSubModeMirrors();
 }
 
 function baseSlotForZone(team, zone){
@@ -5348,9 +5476,14 @@ function renderZoneLabels(){
   wrap.innerHTML = "";
   if (!state.ui.showZones) return;
 
-  // Add 6 for each team side using that team's coordinate mapping
   ["A","B"].forEach(team=>{
+    const occupied = new Set();
+    const t = state.teams[team];
+    for (let slot=1; slot<=6; slot++){
+      if (t.lineup?.[slot]) occupied.add(applyRotation(slot, t.rot || 0));
+    }
     for (let z=1; z<=6; z++){
+      if (occupied.has(z)) continue;
       const c = coordsFor(team, z);
       const label = document.createElement("div");
       label.className = "zone-label";
@@ -5401,7 +5534,7 @@ function updateCourt(){
 
       jerseyEl.textContent = (p.jersey ? `#${p.jersey}` : "");
       nameEl.textContent = p.name || "Unnamed";
-      roleEl.textContent = roleLabel(p.role) || "";
+      roleEl.textContent = "";
 
       token.classList.toggle("is-serving", isServingTeam && currentZone === 1);
     }
@@ -5581,6 +5714,7 @@ function rotateTeam(team){
 
   // Apply automatic substitutions (in/out) on rotation too
   applyAutoSubsAfterRotation(team);
+  showSimRotateBanner(`${teamName(team)} rotated.`);
 
   updateCourt();
   renderCoach();
@@ -5788,6 +5922,7 @@ async function playRally(){
   // Scoring: rally scoring
   if (winnerTeam === "A") state.game.scoreA++;
   else state.game.scoreB++;
+  showSimScoreBanner(`${getServerName(winnerTeam)} from ${teamName(winnerTeam)} scored.`);
 
   // Side-out rotation: if receiver wins, receiver rotates and gains serve
   const sideOut = (winnerTeam !== serverTeam);
@@ -7526,6 +7661,7 @@ function init(){
       ensureSubState(team);
       const chosen = [...sel.options].filter(o=>o.selected).map(o=>o.value);
       state.teams[team].subs[group].candidates = chosen;
+      state.teams[team].subMode = inferSubMode(team);
       // refresh the lane previews everywhere
       renderSimSubLanes();
       renderMySubLanes();
@@ -7537,6 +7673,11 @@ function init(){
   wireSubsSelect("subRightA", "A", "rightSide");
   wireSubsSelect("subLeftB", "B", "leftSide");
   wireSubsSelect("subRightB", "B", "rightSide");
+  wireSubModeControl("subPlannerModeMy", ()=>getMyTeam());
+  wireSubModeControl("subModeBenchMy", ()=>getMyTeam());
+  wireSubModeControl("subModeHomeMy", ()=>getMyTeam());
+  wireSubModeControl("subModeBenchA", "A");
+  wireSubModeControl("subModeBenchB", "B");
 
 
   // initial render
