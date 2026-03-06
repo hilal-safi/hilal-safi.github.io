@@ -12,11 +12,11 @@
     :root{
       --bg: #000000;
       --panel: rgba(255,255,255,.06);
-      --panel2: rgba(255,255,255,.08);
+      --panel2: rgba(255,255,255,.12);
       --text: rgba(255,255,255,.92);
       --muted: rgba(255,255,255,.70);
       --subtle: rgba(255,255,255,.55);
-      --border: rgba(255,255,255,.10);
+      --border: rgba(255,255,255,.18);
       --shadow: 0 10px 30px rgba(0,0,0,.35);
       --shadow2: 0 6px 16px rgba(0,0,0,.35);
       --btn: rgba(255,255,255,.10);
@@ -66,7 +66,7 @@
       --panel2: rgba(0,0,0,.055);
       --text: rgba(0,0,0,.88);
       --muted: rgba(0,0,0,.62);
-      --subtle: rgba(0,0,0,.50);
+      --subtle: rgba(0,0,0,.55);
       --border: rgba(0,0,0,.10);
       --shadow: 0 10px 30px rgba(0,0,0,.10);
       --shadow2: 0 6px 16px rgba(0,0,0,.10);
@@ -965,10 +965,14 @@
       align-items:center;
       gap:10px;
       padding:14px;
-      border-radius: 14px;
-      border:1px solid var(--border);
-      background: rgba(0,0,0,.18);
+      border-radius: 18px;
+      border: 2px solid var(--border);
+      background: linear-gradient(90deg, var(--teamA_fade) 0%, rgba(0,0,0,0.4) 50%, var(--teamB_fade) 100%);
       box-shadow: var(--shadow2);
+    }
+    [data-theme="light"] .scoreboard {
+      background: linear-gradient(90deg, rgba(234,88,12,.1) 0%, rgba(255,255,255,0.8) 50%, rgba(220,38,38,.1) 100%);
+      border-color: rgba(0,0,0,0.15);
     }
     [data-theme="light"] .scoreboard{
       background: rgba(255,255,255,.75);
@@ -1348,6 +1352,10 @@
       background: var(--panel2);
       font-weight:950;
       color: var(--muted);
+    }
+    .mRole {
+      color: var(--accent);
+      font-weight: 900;
     }
     .mName{
       font-size:11px;
@@ -2652,6 +2660,9 @@
 <div class="card-header">
 <div>
 <h2>🏐 Court Preview + Insights</h2>
+<div class="rowBtns no-print" style="margin-bottom:10px;">
+  <button class="btn" onclick="showView('Home')">🏠 Back to Home</button>
+</div>
 <p>See where your 6 are on the court (including rotation) + quick stats.</p>
 </div>
 <div class="teamMeta">
@@ -3106,6 +3117,9 @@
 <div class="card-header">
 <div>
 <h2>📝 Coach Sheet (Rotations 1–6)</h2>
+<div class="rowBtns no-print" style="margin-bottom:10px;">
+  <button class="btn" onclick="showView('Home')">🏠 Back to Home</button>
+</div>
 <p>Printable reference from the current lineup + current rotation.</p>
 </div>
 <div class="coachTop no-print">
@@ -3123,6 +3137,9 @@
 </div>
 </div>
 </div>
+<div class="row no-print" style="padding:0 16px 10px;">
+  <label class="toggle"><input type="checkbox" id="coachShowSubs" checked onchange="renderCoachSheet()"> <span>Show Substitutes</span></label>
+</div>
 <div class="card-body">
 <div aria-live="polite" class="notice" id="coachWarn" role="alert"></div>
 <div class="coachGrid" id="coachGrid"></div>
@@ -3135,6 +3152,9 @@
 <div class="card-header">
 <div>
 <h2>Volleyball Rules &amp; Tips</h2>
+<div class="rowBtns no-print" style="margin-bottom:10px;">
+  <button class="btn" onclick="showView('Home')">🏠 Back to Home</button>
+</div>
 <p>Fast refresher (simplified) + practical coaching reminders.</p>
 </div>
 <div class="rowBtns no-print">
@@ -3283,6 +3303,9 @@
     <div class="card-header">
       <div>
         <h2>🧾 Split Calculator</h2>
+        <div class="rowBtns no-print" style="margin-bottom:10px;">
+          <button class="btn" onclick="showView('Home')">🏠 Back to Home</button>
+        </div>
         <p>Enter the total cost, import your roster, pick the captain (payer), and tick off who has paid.</p>
       </div>
       <div class="rowBtns no-print">
@@ -3316,6 +3339,56 @@
   </section>
 
   <div class="splitGrid">
+<script>
+/* Fix Calendar Month Navigation */
+function changeMonth(dir) {
+  state.calDate.setMonth(state.calDate.getMonth() + dir);
+  renderCalendar();
+}
+
+/* Enhanced Coach Sheet with Subs */
+function renderCoachSheet() {
+  const team = state.activeCoachTeam;
+  const container = document.getElementById('coachGrid');
+  const showSubs = document.getElementById('coachShowSubs').checked;
+  container.innerHTML = '';
+  
+  let tempLineup = [...state.teams[team].lineup];
+  for (let r = 1; r <= 6; r++) {
+    const rotDiv = document.createElement('div');
+    rotDiv.className = 'miniRotation';
+    rotDiv.innerHTML = `<div class="miniHead"><b>Rotation ${r}</b></div>`;
+    const grid = document.createElement('div');
+    grid.className = 'miniGrid';
+    
+    [4,3,2,5,6,1].forEach(z => {
+      const p = state.teams[team].roster.find(x => x.id === tempLineup[z-1]);
+      const zoneDiv = document.createElement('div');
+      zoneDiv.className = 'mZone' + (z===1 ? ' mServe' : '');
+      if(p) {
+        zoneDiv.innerHTML = `<div class="mLabel">${z} <span class="chip">${p.role}</span></div><div class="mName">${p.name}</div>`;
+      } else {
+        zoneDiv.innerHTML = `<div class="mLabel">${z}</div><div class="mName">EMPTY</div>`;
+      }
+      grid.appendChild(zoneDiv);
+    });
+    rotDiv.appendChild(grid);
+    
+    if(showSubs) {
+       const subDiv = document.createElement('div');
+       subDiv.style = "padding:8px; font-size:11px; border-top:1px solid var(--border); background:var(--panel)";
+       const subs = state.teams[team].roster.filter(p => !tempLineup.includes(p.id) && p.playingToday);
+       subDiv.innerHTML = "<b>Subs:</b> " + (subs.map(s => s.name).join(', ') || 'None');
+       rotDiv.appendChild(subDiv);
+    }
+    
+    container.appendChild(rotDiv);
+    // Rotate for next view
+    const last = tempLineup.shift();
+    tempLineup.push(last);
+  }
+}
+</script>
     <!-- TEAM A -->
     <section class="card splitTeamCard" data-team="A">
       <div class="card-header">
