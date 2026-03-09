@@ -3812,7 +3812,7 @@ function uid(){
 }
 
 let state = {
-  version: 1,
+  version: 2,
   ui: {
     showZones: true,
     showRoles: true,
@@ -6238,28 +6238,44 @@ async function playRally(){
 ===================================================== */
 function exportJson(){
   const payload = {
-    version: state.version,
+    version: Math.max(2, Number(state.version) || 2),
+    exportedAt: new Date().toISOString(),
     theme: document.documentElement.getAttribute("data-theme") || "dark",
-    ui: state.ui,
-    settings: state.settings,
+    ui: {
+      ...state.ui,
+      lineupTeam: getMyTeam(),
+      myTeam: getMyTeam(),
+      activeTab: state.ui?.activeTab || "home",
+    },
+    branding: { ...state.branding },
+    coach: { ...state.coach },
+    settings: { ...state.settings },
     leagueSplit: state.leagueSplit,
+    calendar: {
+      timezone: state.calendar?.timezone || "America/Toronto",
+      ui: { ...(state.calendar?.ui || {}) },
+      games: Array.isArray(state.calendar?.games) ? state.calendar.games.map(g=>normalizeGame(g)) : [],
+    },
     game: {
       scoreA: state.game.scoreA,
       scoreB: state.game.scoreB,
       serverTeam: state.game.serverTeam,
       status: state.game.status,
+      events: Array.isArray(state.game.events) ? [...state.game.events] : [],
     },
     teams: {
       A: {
         rot: state.teams.A.rot,
         roster: state.teams.A.roster,
         lineup: state.teams.A.lineup,
+        history: Array.isArray(state.teams.A.history) ? state.teams.A.history : [],
         subs: state.teams.A.subs,
       },
       B: {
         rot: state.teams.B.rot,
         roster: state.teams.B.roster,
         lineup: state.teams.B.lineup,
+        history: Array.isArray(state.teams.B.history) ? state.teams.B.history : [],
         subs: state.teams.B.subs,
       }
     }
@@ -6276,6 +6292,8 @@ function importJson(raw){
   // minimal shape validation
   if (!obj.teams || !obj.teams.A || !obj.teams.B) throw new Error("Invalid JSON: missing teams A/B.");
   if (!obj.teams.A.roster || !obj.teams.B.roster) throw new Error("Invalid JSON: missing rosters.");
+
+  const importedVersion = Number(obj.version) || 1;
 
   const normalizeTeam = (src)=>{
     const roster = Array.isArray(src.roster) ? src.roster : [];
@@ -6321,12 +6339,54 @@ function importJson(raw){
     return { roster: rosterNorm, lineup: lineupNorm, rot, history: [], subs: subsNorm };
   };
 
-  state.ui = obj.ui && typeof obj.ui === "object" ? { showZones: !!obj.ui.showZones, showRoles: !!obj.ui.showRoles } : state.ui;
+  const currentUi = state.ui && typeof state.ui === "object" ? state.ui : {};
+  state.ui = obj.ui && typeof obj.ui === "object"
+    ? {
+        ...currentUi,
+        showZones: ("showZones" in obj.ui) ? !!obj.ui.showZones : currentUi.showZones,
+        showRoles: ("showRoles" in obj.ui) ? !!obj.ui.showRoles : currentUi.showRoles,
+        lineupTeam: (obj.ui.lineupTeam === "B" || obj.ui.myTeam === "B") ? "B" : "A",
+        myTeam: (obj.ui.myTeam === "B" || obj.ui.lineupTeam === "B") ? "B" : "A",
+        activeTab: typeof obj.ui.activeTab === "string" ? obj.ui.activeTab : (currentUi.activeTab || "home"),
+      }
+    : currentUi;
   state.settings = obj.settings && typeof obj.settings === "object"
     ? { targetPoints: clampInt(obj.settings.targetPoints, 1, 99, 15), speed: Number(obj.settings.speed) || 1, autoSubs: ("autoSubs" in obj.settings) ? !!obj.settings.autoSubs : true }
     : state.settings;
 
-  
+  if (obj.branding && typeof obj.branding === "object"){
+    state.branding = {
+      teamAName: String(obj.branding.teamAName || state.branding.teamAName || "Team A").trim() || "Team A",
+      teamBName: String(obj.branding.teamBName || state.branding.teamBName || "Team B").trim() || "Team B",
+      teamAColor: String(obj.branding.teamAColor || state.branding.teamAColor || "#ea580c").trim() || "#ea580c",
+      teamBColor: String(obj.branding.teamBColor || state.branding.teamBColor || "#dc2626").trim() || "#dc2626",
+    };
+  }
+  if (obj.coach && typeof obj.coach === "object"){
+    state.coach = { team: obj.coach.team === "B" ? "B" : "A" };
+  } else {
+    state.coach = state.coach || { team: "A" };
+    state.coach.team = state.coach.team === "B" ? "B" : "A";
+  }
+
+  const normalizeCalendar = (src)=>{
+    const cal = (src && typeof src === "object") ? src : {};
+    const uiSrc = (cal.ui && typeof cal.ui === "object") ? cal.ui : {};
+    const now = new Date();
+    return {
+      timezone: String(cal.timezone || state.calendar?.timezone || "America/Toronto") || "America/Toronto",
+      ui: {
+        year: Number.isFinite(Number(uiSrc.year)) ? clampInt(uiSrc.year, 2000, 2100, now.getFullYear()) : now.getFullYear(),
+        month: Number.isFinite(Number(uiSrc.month)) ? clampInt(uiSrc.month, 0, 11, now.getMonth()) : now.getMonth(),
+        selectedDate: typeof uiSrc.selectedDate === "string" ? uiSrc.selectedDate : "",
+      },
+      games: Array.isArray(cal.games) ? cal.games.map(g=>normalizeGame(g)).filter(g=>g && g.id && g.dtStart && g.summary) : [],
+    };
+  };
+  state.calendar = normalizeCalendar(obj.calendar);
+
+  state.version = Math.max(Number(state.version) || 1, importedVersion);
+
   // league split (optional)
   const normalizeSplit = (srcTeam)=>{
     const t = (srcTeam && typeof srcTeam === "object") ? srcTeam : {};
@@ -6380,7 +6440,9 @@ state.teams.A = normalizeTeam(obj.teams.A);
   state.game.scoreB = clampInt(obj.game?.scoreB, 0, 999, 0);
   state.game.serverTeam = (obj.game?.serverTeam === "B") ? "B" : "A";
   state.game.simActive = false;
-  state.game.events = [];
+  state.game.events = Array.isArray(obj.game?.events)
+    ? obj.game.events.map(x=>String(x ?? "").trim()).filter(Boolean).slice(-50)
+    : [];
   setStatus(String(obj.game?.status ?? "Waiting to start"));
 
   // theme from payload (optional)
@@ -6391,18 +6453,48 @@ state.teams.A = normalizeTeam(obj.teams.A);
   document.getElementById("toggleRoles").checked = state.ui.showRoles;
   document.getElementById("targetPoints").value = state.settings.targetPoints;
   document.getElementById("speed").value = String(state.settings.speed);
+  const autoSubsToggle = document.getElementById("toggleAutoSubs");
+  if (autoSubsToggle) autoSubsToggle.checked = !!state.settings.autoSubs;
+
+  const coachA = document.getElementById("coachTeamA");
+  const coachB = document.getElementById("coachTeamB");
+  if (coachA && coachB){
+    coachA.setAttribute("aria-selected", state.coach.team === "A" ? "true" : "false");
+    coachB.setAttribute("aria-selected", state.coach.team === "B" ? "true" : "false");
+  }
+
+  const aNameIn = document.getElementById("teamAName");
+  const bNameIn = document.getElementById("teamBName");
+  const aColIn = document.getElementById("teamAColor");
+  const bColIn = document.getElementById("teamBColor");
+  if (aNameIn) aNameIn.value = state.branding.teamAName || "Team A";
+  if (bNameIn) bNameIn.value = state.branding.teamBName || "Team B";
+  if (aColIn) aColIn.value = state.branding.teamAColor || "#ea580c";
+  if (bColIn) bColIn.value = state.branding.teamBColor || "#dc2626";
+  applyTeamBrandingToUI();
+  setMyTeam(state.ui.lineupTeam || state.ui.myTeam || "A");
+
   // reflect league split into UI controls
   if (document.getElementById("splitFeeA")){
     try{ ensureSplitDefaults(); }catch(e){}
     renderSplit();
   }
 
+  try{ saveBranding(); }catch(e){}
+  try{ calPersist(); }catch(e){}
 
   renderRosters();
   renderLineups();
   renderScore();
   updateCourt();
   renderCoach();
+  renderCalendar();
+  renderEvents();
+  renderAllBenches();
+  syncSubModeMirrors();
+
+  const activeTab = ["home","lineup","sim","coach","split","calendar","rules"].includes(state.ui?.activeTab) ? state.ui.activeTab : "home";
+  setTab(activeTab, {scroll:false});
 
   // warn if lineups invalid (still load)
   const aIssues = validateLineup("A");
